@@ -235,3 +235,4 @@ await doReq('DELETE', `/api/admin/articles/${freshId}/purge`, { cookie, headers:
 
 console.log(`\n=== Results: ${passed} passed, ${failed} failed ===\n`);
 process.exit(failed > 0 ? 1 : 0);
+

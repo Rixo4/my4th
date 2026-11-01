@@ -92,3 +92,4 @@ try {
 
 console.log(`\n=== Results: ${passed} passed, ${failed} failed ===\n`);
 process.exit(failed > 0 ? 1 : 0);
+
