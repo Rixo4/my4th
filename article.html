@@ -496,7 +496,7 @@
         // Exclude the currently viewed article
         articles = result.filter(a => a.slug !== currentSlug).slice(0, 2);
       }
-      const grid = document.getElementById('relatedNewsGrid');      const grid = document.getElementById('relatedNewsGrid');
+      const grid = document.getElementById('relatedNewsGrid');
       if (!grid) return;
 
       if (articles.length === 0) {
