@@ -266,24 +266,15 @@ function setupNavbarUtilityButtons() {
 // 6. BREAKING NEWS TICKER — rotating clickable headlines
 // ============================================================================
 async function loadBreakingArticles() {
-  const fallback = [
-    { title: 'हिसार-रोहतक हाईवे पर नई रिंग रोड परियोजना को मिली मंज़ूरी, 210 एकड़ ज़मीन का अधिग्रहण जल्द', slug: 'hisar-outer-ring-road-project-approved-2026' },
-    { title: '14 वर्षीय छात्रा ने स्कूल से लौटकर किया आत्मघाती कदम — परिवार शोक में', slug: 'tragic-student-incident-hisar-oct-2026' },
-    { title: 'हिसार DESIVERSE: 24 अक्टूबर को परमीश वर्मा करेंगे परफॉर्म, टिकट बुकिंग शुरू', slug: 'desiverse-cultural-music-fest-hisar-2026' },
-    { title: 'सरसों का भाव हिसार मंडी में ₹5,450 प्रति क्विंटल — किसानों में उत्साह', slug: null },
-    { title: 'अवैध कॉलोनियों पर नगर निगम की बड़ी कार्रवाई, 14 निर्माण कार्यों पर रोक', slug: 'municipal-unauthorized-construction-ban-oct-2026' },
-  ];
+  appState.breakingItems = [];
+  if (!window.HisarKiAawaj?.isSupabaseConfigured()) return;
 
-  if (window.HisarKiAawaj?.isSupabaseConfigured()) {
-    try {
-      const articles = await window.HisarKiAawaj.getPublicArticles({ limit: 6 });
-      if (articles && articles.length > 0) {
-        appState.breakingItems = articles.map(a => ({ title: a.title, slug: a.slug }));
-        return;
-      }
-    } catch (_) {}
+  try {
+    const articles = await window.HisarKiAawaj.getPublicArticles({ limit: 6 });
+    appState.breakingItems = (articles || []).map(a => ({ title: a.title, slug: a.slug }));
+  } catch (err) {
+    console.warn('Breaking news load failed:', err);
   }
-  appState.breakingItems = fallback;
 }
 
 function setupBreakingNewsTicker() {
@@ -292,10 +283,15 @@ function setupBreakingNewsTicker() {
   const closeBtn = document.getElementById('btnCloseBreaking');
   const pauseBtn = document.getElementById('btnPauseBreaking');
   if (!tickerText) return;
+  if (container) container.style.display = 'none';
+  tickerText.textContent = '';
 
-  // Load articles then start ticker
+  // Show the ticker only when published articles are available.
   loadBreakingArticles().then(() => {
-    startBreakingRotation();
+    if (appState.breakingItems.length > 0) {
+      if (container) container.style.display = '';
+      startBreakingRotation();
+    }
   });
 
   function startBreakingRotation() {
@@ -386,15 +382,18 @@ async function initHomePage() {
   setupCarousel();
   setupFloatingAdTool();
 
+  // Clear static demo content before loading the live feed.
+  renderSpotlightFromData([]);
+  renderNewsGridFromData([]);
+  renderTrendingPillsFromArticles([]);
+
   if (window.HisarKiAawaj?.isSupabaseConfigured()) {
     try {
       const articles = await window.HisarKiAawaj.getPublicArticles({ limit: 12 });
-      if (articles && articles.length > 0) {
-        appState.publishedArticles = articles;
-        renderSpotlightFromData(articles);
-        renderNewsGridFromData(articles);
-        renderTrendingPillsFromArticles(articles);
-      }
+      appState.publishedArticles = articles || [];
+      renderSpotlightFromData(appState.publishedArticles);
+      renderNewsGridFromData(appState.publishedArticles);
+      renderTrendingPillsFromArticles(appState.publishedArticles);
 
       const ads = await window.HisarKiAawaj.getActiveAdvertisements();
       if (ads && ads.length > 0) {
@@ -402,21 +401,33 @@ async function initHomePage() {
         renderAdvertisementsFromData(ads);
       }
     } catch (err) {
-      console.warn('Supabase load failed, using fallback:', err);
+      console.warn('News feed load failed:', err);
+      appState.publishedArticles = [];
+      renderSpotlightFromData([]);
+      renderNewsGridFromData([]);
+      renderTrendingPillsFromArticles([]);
       loadSavedAds();
     }
   } else {
+    appState.publishedArticles = [];
+    renderSpotlightFromData([]);
+    renderNewsGridFromData([]);
+    renderTrendingPillsFromArticles([]);
     loadSavedAds();
   }
 }
 
 // Render Spotlight Hero from Supabase
 function renderSpotlightFromData(articles) {
-  const spotlight = articles.find(a => a.is_featured) || articles[0];
-  if (!spotlight) return;
-
   const card = document.querySelector('.spotlight-news-card');
   if (!card) return;
+
+  const spotlight = articles.find(a => a.is_featured) || articles[0];
+  if (!spotlight) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
 
   const img = card.querySelector('.spotlight-img');
   const headline = card.querySelector('.spotlight-headline');
@@ -445,7 +456,10 @@ function renderNewsGridFromData(articles) {
 
   const hero = articles.find(a => a.is_featured) || articles[0];
   const list = articles.filter(a => a.id !== hero?.id);
-  if (list.length === 0) return;
+  if (list.length === 0) {
+    grid.innerHTML = '<p class="news-empty-state">अभी कोई प्रकाशित समाचार उपलब्ध नहीं है।</p>';
+    return;
+  }
 
   // Preserve the native in-feed ad slot
   const infeedAdCardHtml = document.getElementById('adSlotInfeedCard')?.outerHTML || '';
@@ -475,7 +489,14 @@ function renderNewsGridFromData(articles) {
 // Populate trending pills from actual article data
 function renderTrendingPillsFromArticles(articles) {
   const row = document.getElementById('trendingPillsRow');
-  if (!row || articles.length === 0) return;
+  const section = row?.closest('.trending-topics-section');
+  if (!row) return;
+  if (articles.length === 0) {
+    row.innerHTML = '';
+    if (section) section.style.display = 'none';
+    return;
+  }
+  if (section) section.style.display = '';
 
   // Build unique trending tags from article titles
   const pills = articles.slice(0, 8).map(a => {
@@ -526,63 +547,6 @@ const CATEGORY_META = {
   'sports':        { name: 'खेल',           nameEn: 'Sports',        desc: 'जिला व राज्य स्तरीय खेल प्रतियोगिताएं और खिलाड़ी समाचार' },
   'lifestyle':     { name: 'लाइफस्टाइल',    nameEn: 'Lifestyle',     desc: 'कला, संस्कृति, स्वास्थ्य, मनोरंजन और जनजीवन' },
 };
-
-const FALLBACK_ARTICLES = [
-  {
-    slug: 'hisar-outer-ring-road-project-approved-2026',
-    title: 'हिसार-रोहतक हाईवे पर नई रिंग रोड परियोजना को मिली मंज़ूरी, 210 एकड़ ज़मीन का अधिग्रहण जल्द',
-    excerpt: 'शहर में भारी वाहनों के जाम से मुक्ति दिलाने के लिए 34 किमी लंबे नए ग्रीनफील्ड कॉरिडोर को अंतिम तकनीकी स्वीकृति मिल गई है।',
-    featured_image: 'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=600&q=80',
-    categories: { name: 'हिसार विशेष', slug: 'hisar-special' },
-    published_at: new Date(Date.now() - 2 * 3600000).toISOString(),
-    is_featured: true,
-  },
-  {
-    slug: 'tragic-student-incident-hisar-oct-2026',
-    title: 'दुखद: पिता ने पढ़ाई के लिए डांटा तो 14 वर्षीय छात्रा ने फंदा लगा दी जान !',
-    excerpt: 'नाबालिग छात्रा ने मानसिक तनाव में उठाया आत्मघाती कदम। पुलिस ने शव का पोस्टमार्टम करा परिजनों को सौंपा।',
-    featured_image: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80',
-    categories: { name: 'क्राइम व जांच', slug: 'crime' },
-    published_at: new Date(Date.now() - 86400000).toISOString(),
-    is_featured: false,
-  },
-  {
-    slug: 'desiverse-cultural-music-fest-hisar-2026',
-    title: 'हिसार में सजेगी सुरों की महफ़िल: 24 अक्टूबर को होगा "DESIVERSE" का भव्य आयोजन',
-    excerpt: 'प्रसिद्ध गायक परमीश वर्मा और कई प्रमुख कलाकार बिखेरेंगे जलवा। महावीर स्टेडियम में भव्य तैयारियां जारी।',
-    featured_image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80',
-    categories: { name: 'लाइफस्टाइल व संस्कृति', slug: 'lifestyle' },
-    published_at: new Date(Date.now() - 172800000).toISOString(),
-    is_featured: false,
-  },
-  {
-    slug: 'municipal-unauthorized-construction-ban-oct-2026',
-    title: 'अवैध कॉलोनियों को लेकर नगर निगम की सख्त कार्रवाई, 14 निर्माण कार्यों पर रोक के आदेश',
-    excerpt: 'हिसार नगर निगम ने अवैध निर्माण कार्यों पर कड़ी कार्रवाई करते हुए 14 परियोजनाओं को तत्काल रोकने के आदेश जारी किए।',
-    featured_image: 'https://images.unsplash.com/photo-1575505586569-646b2ca898fc?auto=format&fit=crop&w=600&q=80',
-    categories: { name: 'हिसार विशेष', slug: 'hisar-special' },
-    published_at: new Date(Date.now() - 3 * 86400000).toISOString(),
-    is_featured: false,
-  },
-  {
-    slug: 'unpaid-salary-employee-case-oct-2026',
-    title: '8 महीनो से तनख्वाह ना मिलने से परेशान कर्मचारी ने फांसी लगा दी जान, ट्रांसपोर्टर पर केस दर्ज !',
-    excerpt: 'पीड़ित कर्मचारी के परिवार ने ट्रांसपोर्टर के खिलाफ थाने में शिकायत दर्ज कराई है। पुलिस मामले की जांच कर रही है।',
-    featured_image: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=600&q=80',
-    categories: { name: 'क्राइम व जांच', slug: 'crime' },
-    published_at: new Date(Date.now() - 4 * 86400000).toISOString(),
-    is_featured: false,
-  },
-  {
-    slug: 'wife-husband-dispute-investigation-oct-2026',
-    title: 'पारिवारिक कलह में पत्नी ने बेलन, चिमटे से पीट फिर गला दबा की पति की हत्या !',
-    excerpt: 'पुलिस ने आरोपी पत्नी को गिरफ्तार कर मामले की जांच शुरू की। न्यायिक रिमांड पर भेजा गया।',
-    featured_image: 'https://images.unsplash.com/photo-1584467735871-8e85353a8413?auto=format&fit=crop&w=600&q=80',
-    categories: { name: 'क्राइम व जांच', slug: 'crime' },
-    published_at: new Date(Date.now() - 5 * 86400000).toISOString(),
-    is_featured: false,
-  },
-];
 
 let categoryOffset = 0;
 const CATEGORY_PAGE_SIZE = 8;
@@ -690,13 +654,6 @@ async function loadCategoryArticles(slug, append = false) {
     } catch (err) {
       console.warn('Category fetch failed:', err);
     }
-  }
-
-  // Fallback
-  if (articles.length === 0) {
-    articles = FALLBACK_ARTICLES.filter(a => slug === 'hisar-special' || a.categories?.slug === slug);
-    if (articles.length === 0) articles = FALLBACK_ARTICLES.slice(0, 4);
-    totalCount = articles.length;
   }
 
   if (countEl) countEl.textContent = totalCount;
@@ -815,14 +772,6 @@ async function initSearchPage() {
     } catch (err) {
       console.warn('Search failed:', err);
     }
-  }
-
-  // Fallback: search in local demo articles
-  if (results.length === 0) {
-    results = FALLBACK_ARTICLES.filter(a =>
-      a.title.toLowerCase().includes(query.toLowerCase()) ||
-      (a.excerpt || '').toLowerCase().includes(query.toLowerCase())
-    );
   }
 
   if (results.length === 0) {
