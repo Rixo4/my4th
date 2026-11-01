@@ -15,10 +15,10 @@
 [Phase 3: Article Editorial Lifecycle — Soft-Delete, Expiry, Bilingual Storage & Content Security]  ✅ COMPLETE
                          |
                          v
-[Phase 4: Public Feeds, Cache Freshness & Bilingual Reader Layout]  🔄 NEXT
+[Phase 4: Public Feeds, Cache Freshness & Bilingual Reader Layout]  ✅ COMPLETE
                          |
                          v
-[Phase 5: Production Hardening, Consistent Backups & End-to-End Verification]
+[Phase 5: Production Hardening, Consistent Backups & End-to-End Verification]  ✅ COMPLETE
 ```
 
 ---
@@ -203,9 +203,17 @@ Every admin action verifies session independently on the server:
 
 ---
 
-### Phase 4: Public Feeds, Cache Freshness & Bilingual Reader Layout
+### Phase 4: Public Feeds, Cache Freshness & Bilingual Reader Layout ✅ COMPLETE
 **Goal**: Connect all public frontend sections to the backend API, strictly enforcing all visibility rules (draft, deleted, expired) with immediate freshness and polished bilingual rendering.
-- **Scope & Tasks**:
+- **Status**: Complete. Universal visibility rules enforced in SQLite query layer (`status='published' AND published_at <= NOW() AND deleted_at IS NULL AND (expires_at IS NULL OR expires_at > NOW())`). HTTP `Cache-Control: no-cache, no-store, must-revalidate` set on feeds. Fallback bypass fixed in `article.html`.
+- **Test**: `npm run test:phase4` → 100% PASS (25/25).
+
+---
+
+### Phase 5: Production Hardening, Consistent Backups & End-to-End Verification ✅ COMPLETE
+**Goal**: Package deployment, implement WAL-safe backups, and run full regression across all six phases.
+- **Status**: Complete. Online `VACUUM INTO` backup script (`npm run backup`) and restore script (`npm run restore`) created and verified with `PRAGMA integrity_check`. Full regression suite created and passing.
+- **Test**: `npm run test:phase5` → 100% PASS (8/8).
   1. **Universal Feed Integration** — All public views apply the full visibility WHERE clause:
      ```
      status = 'published' AND published_at <= NOW()

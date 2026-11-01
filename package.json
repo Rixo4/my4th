@@ -16,7 +16,11 @@
     "test:server": "node scripts/probe-server.js",
     "admin:provision": "node scripts/provision-admin.js",
     "test:phase2": "node scripts/verify-phase2.js",
-    "test:phase3": "node scripts/verify-phase3.js"
+    "test:phase3": "node scripts/verify-phase3.js",
+    "test:phase4": "node scripts/verify-phase4.js",
+    "backup": "node scripts/backup.js",
+    "restore": "node scripts/restore.js",
+    "test:phase5": "node scripts/verify-phase5.js"
   },
   "keywords": [
     "news",
