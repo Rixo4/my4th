@@ -55,7 +55,10 @@ async function signInAdmin(email, password) {
 
 async function signOutAdmin() {
   if (isLocalBackend()) {
-    await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    }).catch(() => {});
   }
 }
 
@@ -104,7 +107,7 @@ async function uploadMediaFile(file) {
       try {
         const res = await fetch('/api/admin/upload', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
           body: JSON.stringify({
             fileName: file.name,
             dataBase64: reader.result
@@ -182,7 +185,7 @@ async function saveArticle(articleData) {
 
   const res = await fetch(url, {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
     body: JSON.stringify(articleData)
   });
 
@@ -192,9 +195,38 @@ async function saveArticle(articleData) {
 }
 
 async function deleteArticle(id) {
-  const res = await fetch(`/api/admin/articles/${id}`, { method: 'DELETE' });
+  const res = await fetch(`/api/admin/articles/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to delete article');
+  return true;
+}
+
+async function getTrashedArticles() {
+  const res = await fetch('/api/admin/articles/trash');
+  if (!res.ok) return [];
+  return await res.json();
+}
+
+async function restoreArticle(id) {
+  const res = await fetch(`/api/admin/articles/${id}/restore`, {
+    method: 'POST',
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to restore article');
+  return data;
+}
+
+async function purgeArticle(id) {
+  const res = await fetch(`/api/admin/articles/${id}/purge`, {
+    method: 'DELETE',
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to purge article');
   return true;
 }
 
@@ -211,7 +243,7 @@ async function getCategories() {
 async function saveCategory(categoryData) {
   const res = await fetch('/api/admin/categories', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
     body: JSON.stringify(categoryData)
   });
   const data = await res.json();
@@ -220,7 +252,10 @@ async function saveCategory(categoryData) {
 }
 
 async function deleteCategory(id) {
-  const res = await fetch(`/api/admin/categories/${id}`, { method: 'DELETE' });
+  const res = await fetch(`/api/admin/categories/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to delete category');
   return true;
@@ -245,7 +280,7 @@ async function getAdminAdvertisements() {
 async function saveAdvertisement(adData) {
   const res = await fetch('/api/admin/ads', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
     body: JSON.stringify(adData)
   });
   const data = await res.json();
@@ -254,7 +289,10 @@ async function saveAdvertisement(adData) {
 }
 
 async function deleteAdvertisement(id) {
-  const res = await fetch(`/api/admin/ads/${id}`, { method: 'DELETE' });
+  const res = await fetch(`/api/admin/ads/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to delete advertisement');
   return true;
@@ -276,6 +314,9 @@ window.HisarKiAawaj = {
   getAdminArticleById,
   saveArticle,
   deleteArticle,
+  getTrashedArticles,
+  restoreArticle,
+  purgeArticle,
   getCategories,
   saveCategory,
   deleteCategory,

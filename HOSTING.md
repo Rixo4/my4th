@@ -26,3 +26,4 @@ Per [SQLite WAL Documentation](https://www.sqlite.org/wal.html):
 ## 3. Recommended Deployment Targets
 - Single VPS (Hetzner Cloud, DigitalOcean Droplet, Linode) with Caddy / Nginx reverse proxy for automated HTTPS and SSL certificates.
 - Container PaaS with dedicated persistent volume (Railway with Volume, Render Web Service with Persistent Disk, Fly.io with Mount).
+

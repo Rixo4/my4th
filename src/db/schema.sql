@@ -37,11 +37,29 @@ CREATE TABLE IF NOT EXISTS articles (
   seo_title TEXT,
   seo_description TEXT,
   published_at DATETIME,
+  language TEXT NOT NULL DEFAULT 'hi',
+  translation_of_id INTEGER REFERENCES articles(id) ON DELETE SET NULL,
+  deleted_at DATETIME DEFAULT NULL,
+  expires_at DATETIME DEFAULT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- 4. ADVERTISEMENTS
+-- 4. SESSIONS (persistent across restarts, enforces idle & absolute expiry server-side)
+CREATE TABLE IF NOT EXISTS sessions (
+  token TEXT PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES admin_users(id) ON DELETE CASCADE,
+  username TEXT NOT NULL,
+  full_name TEXT,
+  role TEXT NOT NULL DEFAULT 'admin',
+  created_at INTEGER NOT NULL,        -- Unix ms timestamp
+  expires_at INTEGER NOT NULL,        -- Absolute expiry (Unix ms, 24 h)
+  idle_expires_at INTEGER NOT NULL    -- Idle expiry (Unix ms, 30 min, refreshed on use)
+);
+
+CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
+
+-- 5. ADVERTISEMENTS
 CREATE TABLE IF NOT EXISTS advertisements (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
@@ -68,6 +86,8 @@ CREATE TABLE IF NOT EXISTS advertisements (
 CREATE INDEX IF NOT EXISTS idx_articles_status_pub ON articles(status, published_at DESC);
 CREATE INDEX IF NOT EXISTS idx_articles_category ON articles(category_id);
 CREATE INDEX IF NOT EXISTS idx_articles_featured ON articles(is_featured);
+CREATE INDEX IF NOT EXISTS idx_articles_expires ON articles(expires_at);
+CREATE INDEX IF NOT EXISTS idx_articles_deleted ON articles(deleted_at);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_slug ON articles(slug);
 CREATE INDEX IF NOT EXISTS idx_categories_slug ON categories(slug);
 CREATE INDEX IF NOT EXISTS idx_ads_placement ON advertisements(placement, is_active);

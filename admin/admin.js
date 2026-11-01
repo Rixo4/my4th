@@ -106,7 +106,8 @@ window.switchToView = function(viewId) {
     viewArticleEditor: 'Article Editor',
     viewCategories: 'Manage Categories',
     viewAdvertisements: 'Manage Advertisements',
-    viewSettings: 'Settings & Supabase'
+    viewSettings: 'Settings & Supabase',
+    viewTrash: 'Trash Bin & Recovery'
   };
   document.getElementById('pageTitleText').textContent = titles[viewId] || 'Admin Portal';
 
@@ -115,6 +116,7 @@ window.switchToView = function(viewId) {
   if (viewId === 'viewManageNews') loadManageNews();
   if (viewId === 'viewCategories') loadCategoriesTable();
   if (viewId === 'viewAdvertisements') loadAdvertisementsTable();
+  if (viewId === 'viewTrash') loadTrashView();
 };
 
 // ============================================================================
@@ -213,31 +215,47 @@ async function loadManageNews() {
     return;
   }
 
-  tbody.innerHTML = articles.map(art => `
+  tbody.innerHTML = articles.map(art => {
+    let expiryBadge = '';
+    if (art.expires_at) {
+      const expTime = new Date(art.expires_at).getTime();
+      const now = Date.now();
+      if (now >= expTime) {
+        expiryBadge = ' <span class="status-pill" style="background:#fee2e2;color:#dc2626;font-size:10px;margin-left:4px;">EXPIRED</span>';
+      } else if (expTime - now < 24 * 60 * 60 * 1000) {
+        expiryBadge = ' <span class="status-pill" style="background:#fef3c7;color:#b45309;font-size:10px;margin-left:4px;">EXPIRES SOON</span>';
+      }
+    }
+    const langBadge = art.language === 'en'
+      ? '<span style="font-size:10px;background:#e0f2fe;color:#0369a1;padding:2px 5px;border-radius:4px;font-weight:700;margin-left:4px;">EN</span>'
+      : '<span style="font-size:10px;background:#fef3c7;color:#b45309;padding:2px 5px;border-radius:4px;font-weight:700;margin-left:4px;">HI</span>';
+
+    return `
     <tr>
       <td>
         <div class="table-article-title-cell">
           <img src="${art.featured_image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=100'}" class="table-thumb" alt="thumb">
           <div>
-            <div class="table-title-text">${art.title}</div>
+            <div class="table-title-text">${art.title} ${langBadge}</div>
             <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">/${art.slug}</div>
             ${art.is_featured ? '<span class="badge-featured-star">★ FEATURED SPOTLIGHT</span>' : ''}
           </div>
         </div>
       </td>
       <td><span style="font-weight: 700; font-size: 12px;">${art.categories?.name || 'General'}</span></td>
-      <td><span class="status-pill ${art.status}">${art.status}</span></td>
+      <td><span class="status-pill ${art.status}">${art.status}</span>${expiryBadge}</td>
       <td style="color: #64748b; font-size: 12px;">${formatDate(art.published_at || art.created_at)}</td>
       <td style="font-weight: 700; font-size: 12px; color: #475569;">${(art.views_count || 0).toLocaleString()}</td>
       <td style="text-align: right;">
         <div class="action-buttons-group" style="justify-content: flex-end;">
           <a href="../article.html?slug=${art.slug}" target="_blank" class="btn-table-action" title="View Public Post">👁️</a>
           <button class="btn-table-action" title="Edit Article" onclick="editArticle('${art.id}')">✏️</button>
-          <button class="btn-table-action delete" title="Delete Article" onclick="promptDelete('article', '${art.id}', '${escapeQuotes(art.title)}')">🗑️</button>
+          <button class="btn-table-action delete" title="Move to Trash" onclick="promptDelete('article', '${art.id}', '${escapeQuotes(art.title)}')">🗑️</button>
         </div>
       </td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 
   // Setup search & filter listener
   if (searchInput && !searchInput.dataset.listening) {
@@ -321,6 +339,12 @@ function setupArticleEditor() {
     }
   });
 
+  // Clear expiry date button
+  document.getElementById('btnClearExpiresAt')?.addEventListener('click', () => {
+    const exp = document.getElementById('editorExpiresAt');
+    if (exp) exp.value = '';
+  });
+
   // Toggle Scheduled date picker
   statusSelect?.addEventListener('change', () => {
     if (statusSelect.value === 'scheduled' && !dateInput.value) {
@@ -350,6 +374,12 @@ function setupArticleEditor() {
       const is_featured = document.getElementById('editorIsFeatured').checked;
       const seo_title = document.getElementById('editorSeoTitle').value.trim();
       const seo_description = document.getElementById('editorSeoDesc').value.trim();
+      const language = document.getElementById('editorLanguage')?.value || 'hi';
+      const expiresInput = document.getElementById('editorExpiresAt');
+      let expires_at = null;
+      if (expiresInput && expiresInput.value) {
+        expires_at = new Date(expiresInput.value).toISOString();
+      }
       
       let published_at = dateInput.value ? new Date(dateInput.value).toISOString() : null;
       if (status === 'published' && !published_at) {
@@ -376,7 +406,9 @@ function setupArticleEditor() {
         is_featured,
         seo_title,
         seo_description,
-        published_at
+        published_at,
+        language,
+        expires_at
       };
 
       if (window.HisarKiAawaj?.isSupabaseConfigured()) {
@@ -415,6 +447,8 @@ window.resetArticleEditor = function() {
   document.getElementById('editorIsFeatured').checked = false;
   document.getElementById('editorSeoTitle').value = '';
   document.getElementById('editorSeoDesc').value = '';
+  if (document.getElementById('editorLanguage')) document.getElementById('editorLanguage').value = 'hi';
+  if (document.getElementById('editorExpiresAt')) document.getElementById('editorExpiresAt').value = '';
   
   const now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -450,6 +484,16 @@ window.editArticle = async function(id) {
   document.getElementById('editorIsFeatured').checked = !!art.is_featured;
   document.getElementById('editorSeoTitle').value = art.seo_title || '';
   document.getElementById('editorSeoDesc').value = art.seo_description || '';
+  if (document.getElementById('editorLanguage')) document.getElementById('editorLanguage').value = art.language || 'hi';
+  if (document.getElementById('editorExpiresAt')) {
+    if (art.expires_at) {
+      const expDate = new Date(art.expires_at);
+      expDate.setMinutes(expDate.getMinutes() - expDate.getTimezoneOffset());
+      document.getElementById('editorExpiresAt').value = expDate.toISOString().slice(0, 16);
+    } else {
+      document.getElementById('editorExpiresAt').value = '';
+    }
+  }
 
   if (art.featured_image) {
     document.getElementById('featuredImgPreview').src = art.featured_image;
@@ -811,7 +855,7 @@ function setupAdModal() {
 }
 
 // ============================================================================
-// 8. DELETION CONFIRMATION MODAL
+// 8. DELETION & TRASH MANAGEMENT
 // ============================================================================
 function setupDeleteModal() {
   const modal = document.getElementById('deleteConfirmModal');
@@ -820,7 +864,20 @@ function setupDeleteModal() {
 
   window.promptDelete = function(type, id, name) {
     adminState.deleteTarget = { type, id, name };
-    msgEl.textContent = `Are you sure you want to permanently delete "${name}"? This action cannot be reversed.`;
+    if (type === 'article') {
+      msgEl.textContent = `Move "${name}" to Trash? It will be removed from all public pages immediately and can be recovered later from the Trash Bin.`;
+      confirmBtn.textContent = 'Move to Trash';
+    } else {
+      msgEl.textContent = `Are you sure you want to permanently delete "${name}"? This action cannot be reversed.`;
+      confirmBtn.textContent = 'Delete Record';
+    }
+    modal.classList.add('active');
+  };
+
+  window.promptPurgeArticle = function(id, name) {
+    adminState.deleteTarget = { type: 'purge-article', id, name };
+    msgEl.textContent = `PERMANENTLY DELETE "${name}"? This will physically erase the story from the database. This action CANNOT be undone.`;
+    confirmBtn.textContent = 'Permanently Delete';
     modal.classList.add('active');
   };
 
@@ -833,9 +890,20 @@ function setupDeleteModal() {
     if (!adminState.deleteTarget) return;
     const { type, id } = adminState.deleteTarget;
     confirmBtn.disabled = true;
-    confirmBtn.textContent = 'Deleting...';
+    confirmBtn.textContent = 'Processing...';
 
     try {
+      if (type === 'purge-article') {
+        if (window.HisarKiAawaj?.isSupabaseConfigured()) {
+          await window.HisarKiAawaj.purgeArticle(id);
+        }
+        showAdminToast('Article permanently deleted from database.');
+        closeDeleteModal();
+        loadTrashView();
+        loadDashboardMetrics();
+        return;
+      }
+
       if (window.HisarKiAawaj?.isSupabaseConfigured()) {
         if (type === 'article') await window.HisarKiAawaj.deleteArticle(id);
         if (type === 'category') await window.HisarKiAawaj.deleteCategory(id);
@@ -846,7 +914,7 @@ function setupDeleteModal() {
         if (type === 'ad') adminState.advertisements = adminState.advertisements.filter(a => a.id !== id);
       }
 
-      showAdminToast('Record deleted successfully.');
+      showAdminToast(type === 'article' ? 'Article moved to Trash.' : 'Record deleted successfully.');
       closeDeleteModal();
 
       if (type === 'article') { loadManageNews(); loadDashboardMetrics(); }
@@ -856,10 +924,67 @@ function setupDeleteModal() {
       alert('Delete failed: ' + err.message);
     } finally {
       confirmBtn.disabled = false;
-      confirmBtn.textContent = 'Delete Record';
+      confirmBtn.textContent = 'Confirm';
     }
   });
 }
+
+// Trash Bin View loader
+window.loadTrashView = async function() {
+  const tbody = document.getElementById('trashTbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 24px;">Loading trashed articles...</td></tr>`;
+
+  try {
+    let trashed = [];
+    if (window.HisarKiAawaj?.isSupabaseConfigured()) {
+      trashed = await window.HisarKiAawaj.getTrashedArticles();
+    }
+
+    if (!trashed || trashed.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 32px;">Trash is empty. No deleted articles.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = trashed.map(art => `
+      <tr>
+        <td>
+          <div class="table-article-title-cell">
+            <img src="${art.featured_image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=100'}" class="table-thumb" alt="thumb">
+            <div>
+              <div class="table-title-text">${art.title}</div>
+              <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">/${art.slug}</div>
+            </div>
+          </div>
+        </td>
+        <td><span style="font-weight: 700; font-size: 12px;">${(art.language || 'hi').toUpperCase()}</span></td>
+        <td style="color: #ef4444; font-size: 12px; font-weight: 600;">${formatDate(art.deleted_at || art.created_at)}</td>
+        <td style="text-align: right;">
+          <div class="action-buttons-group" style="justify-content: flex-end;">
+            <button class="btn-table-action" style="color: #059669; font-weight: 700;" title="Restore Article" onclick="restoreTrashedArticle('${art.id}')">🔄 Restore</button>
+            <button class="btn-table-action delete" style="color: #dc2626;" title="Permanently Delete" onclick="promptPurgeArticle('${art.id}', '${escapeQuotes(art.title)}')">❌ Permanent Delete</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #dc2626; padding: 24px;">Error loading trash: ${err.message}</td></tr>`;
+  }
+};
+
+window.restoreTrashedArticle = async function(id) {
+  try {
+    if (window.HisarKiAawaj?.isSupabaseConfigured()) {
+      await window.HisarKiAawaj.restoreArticle(id);
+    }
+    showAdminToast('✅ Article restored successfully!');
+    loadTrashView();
+    loadDashboardMetrics();
+  } catch (err) {
+    alert('Restore failed: ' + err.message);
+  }
+};
 
 // ============================================================================
 // 9. SETTINGS VIEW

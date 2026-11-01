@@ -42,6 +42,10 @@
         <span>📰</span>
         <span>Manage News</span>
       </a>
+      <a class="sidebar-nav-btn" data-view="viewTrash">
+        <span>🗑️</span>
+        <span>Trash Bin</span>
+      </a>
       <a class="sidebar-nav-btn" data-view="viewArticleEditor" onclick="resetArticleEditor()">
         <span>✍️</span>
         <span>Add New Article</span>
@@ -311,6 +315,23 @@
                   <input type="datetime-local" id="editorPublishDate" class="form-control-input">
                 </div>
 
+                <div class="form-group-block" id="editorLanguageGroup">
+                  <label class="form-label-bold" for="editorLanguage">Language (भाषा)</label>
+                  <select id="editorLanguage" class="form-control-input">
+                    <option value="hi" selected>Hindi (हिन्दी)</option>
+                    <option value="en">English (अंग्रेज़ी)</option>
+                  </select>
+                </div>
+
+                <div class="form-group-block" id="editorExpiresAtGroup">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label class="form-label-bold" for="editorExpiresAt" style="margin-bottom: 0;">Auto-Expiry (IST)</label>
+                    <button type="button" id="btnClearExpiresAt" style="background: none; border: none; color: #ef4444; font-size: 11px; font-weight: 700; cursor: pointer;">Clear</button>
+                  </div>
+                  <input type="datetime-local" id="editorExpiresAt" class="form-control-input">
+                  <span style="font-size: 11px; color: #64748b; margin-top: 4px; display: block;">Leave blank for no expiration. Expired stories are automatically hidden from all public pages.</span>
+                </div>
+
                 <div class="form-group-block">
                   <label class="form-label-bold" for="editorAuthorName">Author / Reporter Name</label>
                   <input type="text" id="editorAuthorName" class="form-control-input" value="HisarKiAawaj Bureau">
@@ -457,6 +478,38 @@
               </p>
               <p><b>4. Storage Bucket:</b> The <code>news-media</code> bucket is automatically configured as public for reading images, while writes/deletes are strictly restricted to admins.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           VIEW 7: TRASH & RECOVERY (कचरा पेटी)
+           ================================================================== -->
+      <section id="viewTrash" class="admin-view-panel" style="display: none;">
+        <div class="content-box-card">
+          <div class="table-filter-bar">
+            <div>
+              <h3 style="font-size: 16px; font-weight: 800; color: #dc2626;">🗑️ Trash Bin (हटाए गए लेख)</h3>
+              <p style="font-size: 12px; color: #64748b; margin-top: 2px;">
+                Articles in Trash are hidden from all public pages immediately. You can restore them or permanently delete them.
+              </p>
+            </div>
+            <button class="btn-public-site-link" onclick="loadTrashView()">🔄 Refresh</button>
+          </div>
+          <div class="data-table-container">
+            <table class="cms-table">
+              <thead>
+                <tr>
+                  <th>Article</th>
+                  <th>Language</th>
+                  <th>Deleted At</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="trashTbody">
+                <tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 24px;">Loading trashed articles...</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>

@@ -18,4 +18,6 @@ ehthumbs.db
 .DS_Store
 
 # Temporary uploads / logs
+uploads/*
+!uploads/.gitkeep
 *.log

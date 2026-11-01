@@ -15,6 +15,22 @@ export function verifyPassword(password, storedPasswordHash) {
   return crypto.timingSafeEqual(keyBuffer, derivedBuffer);
 }
 
+export function verifyPasswordAsync(password, storedPasswordHash) {
+  return new Promise((resolve, reject) => {
+    if (!storedPasswordHash || !storedPasswordHash.includes(':')) return resolve(false);
+    const [salt, key] = storedPasswordHash.split(':');
+    const keyBuffer = Buffer.from(key, 'hex');
+    crypto.scrypt(password, salt, 64, (err, derivedBuffer) => {
+      if (err) return reject(err);
+      try {
+        resolve(crypto.timingSafeEqual(keyBuffer, derivedBuffer));
+      } catch {
+        resolve(false);
+      }
+    });
+  });
+}
+
 export function findAdminByUsername(username) {
   const db = getDb();
   const stmt = db.prepare('SELECT * FROM admin_users WHERE username = ?');

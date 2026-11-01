@@ -4,15 +4,19 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { config } from './config.js';
 import { getDb } from './db/index.js';
-import { findAdminByUsername, verifyPassword } from './db/auth.js';
+import { findAdminByUsername, verifyPasswordAsync } from './db/auth.js';
 import {
   createArticle,
   getArticleById,
   getArticleBySlug,
   listPublishedArticles,
   listAllArticles,
+  listTrashedArticles,
   updateArticle,
   deleteArticle,
+  trashArticle,
+  restoreArticle,
+  purgeArticle,
   getDashboardMetrics
 } from './db/articles.js';
 import {
@@ -38,6 +42,170 @@ const MIME_TYPES = {
   '.webp': 'image/webp'
 };
 
+// ============================================================================
+// SESSION PERSISTENCE (SQLite-backed)
+// ============================================================================
+function ensureSessionsTable() {
+  const db = getDb();
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      token TEXT PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      username TEXT NOT NULL,
+      full_name TEXT NOT NULL,
+      role TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      expires_at INTEGER NOT NULL,
+      idle_expires_at INTEGER NOT NULL
+    )
+  `);
+}
+
+function persistSession(token, session) {
+  const db = getDb();
+  db.prepare(`
+    INSERT OR REPLACE INTO sessions
+      (token, user_id, username, full_name, role, created_at, expires_at, idle_expires_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    token,
+    session.userId,
+    session.username,
+    session.fullName,
+    session.role,
+    session.createdAt,
+    session.expiresAt,
+    session.idleExpiresAt
+  );
+}
+
+function deletePersistedSession(token) {
+  try {
+    getDb().prepare('DELETE FROM sessions WHERE token = ?').run(token);
+  } catch { /* ignore if table doesn't exist yet */ }
+}
+
+function loadSessionsFromDb() {
+  try {
+    const rows = getDb().prepare('SELECT * FROM sessions WHERE expires_at > ? AND idle_expires_at > ?').all(Date.now(), Date.now());
+    for (const row of rows) {
+      sessions.set(row.token, {
+        userId: row.user_id,
+        username: row.username,
+        fullName: row.full_name,
+        role: row.role,
+        createdAt: row.created_at,
+        expiresAt: row.expires_at,
+        idleExpiresAt: row.idle_expires_at
+      });
+    }
+  } catch { /* fresh DB, no sessions table yet */ }
+}
+
+// ============================================================================
+// BRUTE-FORCE TRACKING
+// ============================================================================
+const loginAttempts = new Map(); // ip -> { count, lockedUntil }
+const LOCK_WINDOW_MS = 15 * 60 * 1000;
+const MAX_ATTEMPTS = 5;
+
+function getClientIp(req) {
+  return (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+}
+
+function isLockedOut(ip) {
+  const entry = loginAttempts.get(ip);
+  if (!entry) return false;
+  if (entry.lockedUntil && Date.now() < entry.lockedUntil) return true;
+  if (entry.lockedUntil && Date.now() >= entry.lockedUntil) {
+    loginAttempts.delete(ip);
+    return false;
+  }
+  return false;
+}
+
+function recordFailedLogin(ip) {
+  const entry = loginAttempts.get(ip) || { count: 0, lockedUntil: null };
+  entry.count += 1;
+  if (entry.count >= MAX_ATTEMPTS) {
+    entry.lockedUntil = Date.now() + LOCK_WINDOW_MS;
+  }
+  loginAttempts.set(ip, entry);
+}
+
+function clearLoginAttempts(ip) {
+  loginAttempts.delete(ip);
+}
+
+// ============================================================================
+// SESSION MANAGEMENT
+// ============================================================================
+const sessions = new Map();
+
+function buildCookie(token) {
+  const maxAge = 24 * 60 * 60; // 24 hours
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  return `hisar_session=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${maxAge}${secure}`;
+}
+
+function createSession(user) {
+  const token = crypto.randomBytes(32).toString('hex');
+  const now = Date.now();
+  const session = {
+    userId: user.id,
+    username: user.username,
+    fullName: user.full_name || 'Administrator',
+    role: user.role || 'admin',
+    createdAt: now,
+    expiresAt: now + 24 * 60 * 60 * 1000,      // 24 hours absolute
+    idleExpiresAt: now + 30 * 60 * 1000          // 30 min idle
+  };
+  sessions.set(token, session);
+  persistSession(token, session);
+  return token;
+}
+
+function getSessionCookieToken(req) {
+  const cookieHeader = req.headers.cookie;
+  if (!cookieHeader) return null;
+  const cookies = Object.fromEntries(
+    cookieHeader.split(';').map(c => {
+      const [k, ...v] = c.trim().split('=');
+      return [k, v.join('=')];
+    })
+  );
+  return cookies['hisar_session'] || null;
+}
+
+function getSessionFromRequest(req) {
+  const token = getSessionCookieToken(req);
+  if (!token) return null;
+
+  const session = sessions.get(token);
+  if (!session) return null;
+
+  const now = Date.now();
+  if (now > session.expiresAt || now > session.idleExpiresAt) {
+    sessions.delete(token);
+    deletePersistedSession(token);
+    return null;
+  }
+
+  // Refresh idle timeout
+  session.idleExpiresAt = now + 30 * 60 * 1000;
+  persistSession(token, session);
+
+  return { token, ...session };
+}
+
+function deleteSession(token) {
+  sessions.delete(token);
+  deletePersistedSession(token);
+}
+
+// ============================================================================
+// HELPERS
+// ============================================================================
 function formatArticle(a) {
   if (!a) return null;
   return {
@@ -54,6 +222,10 @@ function formatArticle(a) {
     seo_title: a.seo_title || null,
     seo_description: a.seo_description || null,
     published_at: a.published_at || null,
+    language: a.language || 'hi',
+    translation_of_id: a.translation_of_id || null,
+    deleted_at: a.deleted_at || null,
+    expires_at: a.expires_at || null,
     created_at: a.created_at,
     updated_at: a.updated_at,
     category_id: a.category_id || null,
@@ -63,46 +235,6 @@ function formatArticle(a) {
       slug: a.category_slug || 'general'
     } : null
   };
-}
-const sessions = new Map();
-
-function createSession(user) {
-  const token = crypto.randomBytes(32).toString('hex');
-  const session = {
-    userId: user.id,
-    username: user.username,
-    fullName: user.full_name || 'Administrator',
-    role: user.role || 'admin',
-    createdAt: Date.now(),
-    expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 days
-  };
-  sessions.set(token, session);
-  return token;
-}
-
-function getSessionFromRequest(req) {
-  const cookieHeader = req.headers.cookie;
-  if (!cookieHeader) return null;
-
-  const cookies = Object.fromEntries(
-    cookieHeader.split(';').map(c => {
-      const [k, ...v] = c.trim().split('=');
-      return [k, v.join('=')];
-    })
-  );
-
-  const token = cookies['hisar_session'];
-  if (!token) return null;
-
-  const session = sessions.get(token);
-  if (!session) return null;
-
-  if (Date.now() > session.expiresAt) {
-    sessions.delete(token);
-    return null;
-  }
-
-  return { token, ...session };
 }
 
 function parseJsonBody(req) {
@@ -136,7 +268,28 @@ function sendJson(res, statusCode, data, headers = {}) {
   res.end(JSON.stringify(data));
 }
 
-// Request Handler
+// ============================================================================
+// HTML SANITIZER (Phase 3 - defined here for use in article routes)
+// ============================================================================
+function sanitizeHtml(html) {
+  if (!html) return '';
+  // Strip dangerous tags and their contents
+  let out = html.replace(/<script[\s\S]*?<\/script>/gi, '')
+                .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+                .replace(/<object[\s\S]*?<\/object>/gi, '')
+                .replace(/<embed[^>]*>/gi, '')
+                .replace(/<form[\s\S]*?<\/form>/gi, '')
+                .replace(/<style[\s\S]*?<\/style>/gi, '');
+  // Strip all event handlers (on*)
+  out = out.replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/gi, '');
+  // Strip javascript: hrefs
+  out = out.replace(/href\s*=\s*(?:"javascript:[^"]*"|'javascript:[^']*')/gi, '');
+  return out;
+}
+
+// ============================================================================
+// REQUEST HANDLER
+// ============================================================================
 const server = http.createServer(async (req, res) => {
   const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = parsedUrl.pathname;
@@ -147,7 +300,7 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(204, {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
       'Access-Control-Allow-Credentials': 'true'
     });
     return res.end();
@@ -160,16 +313,31 @@ const server = http.createServer(async (req, res) => {
     try {
       // 1. AUTH: Login
       if (pathname === '/api/auth/login' && method === 'POST') {
+        const ip = getClientIp(req);
+
+        if (isLockedOut(ip)) {
+          return sendJson(res, 429, { error: 'Too many failed login attempts. Please try again in 15 minutes.' });
+        }
+
         const { email, username, password } = await parseJsonBody(req);
         const loginUser = username || email;
         const user = findAdminByUsername(loginUser);
 
-        if (!user || !verifyPassword(password, user.password_hash)) {
+        const valid = user ? await verifyPasswordAsync(password, user.password_hash) : false;
+
+        if (!user || !valid) {
+          recordFailedLogin(ip);
           return sendJson(res, 401, { error: 'Invalid username or password' });
         }
 
+        clearLoginAttempts(ip);
+
+        // Session ID rotation: delete old session if present
+        const oldToken = getSessionCookieToken(req);
+        if (oldToken) deleteSession(oldToken);
+
         const token = createSession(user);
-        const cookie = `hisar_session=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${7 * 86400}`;
+        const cookie = buildCookie(token);
 
         return sendJson(res, 200, {
           success: true,
@@ -179,8 +347,8 @@ const server = http.createServer(async (req, res) => {
 
       // 2. AUTH: Logout
       if (pathname === '/api/auth/logout' && method === 'POST') {
-        const session = getSessionFromRequest(req);
-        if (session) sessions.delete(session.token);
+        const token = getSessionCookieToken(req);
+        if (token) deleteSession(token);
         const cookie = `hisar_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0`;
         return sendJson(res, 200, { success: true }, { 'Set-Cookie': cookie });
       }
@@ -212,7 +380,7 @@ const server = http.createServer(async (req, res) => {
           : null;
 
         const articles = listPublishedArticles({ limit, offset, categorySlug, isFeatured }).map(formatArticle);
-        return sendJson(res, 200, articles);
+        return sendJson(res, 200, articles, { 'Cache-Control': 'no-cache, no-store, must-revalidate' });
       }
 
       // 5. PUBLIC: Get single published article by slug
@@ -223,7 +391,7 @@ const server = http.createServer(async (req, res) => {
         if (!article) {
           return sendJson(res, 404, { error: 'Article not found or not published' });
         }
-        return sendJson(res, 200, formatArticle(article));
+        return sendJson(res, 200, formatArticle(article), { 'Cache-Control': 'no-cache, no-store, must-revalidate' });
       }
 
       // 6. PUBLIC: Get categories
@@ -243,6 +411,14 @@ const server = http.createServer(async (req, res) => {
       // PROTECTED ADMIN ROUTES (Require Admin Session)
       // ======================================================================
       if (pathname.startsWith('/api/admin/')) {
+        // CSRF protection: state-changing methods require X-Requested-With header
+        if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+          const xrw = req.headers['x-requested-with'];
+          if (!xrw || xrw.toLowerCase() !== 'xmlhttprequest') {
+            return sendJson(res, 403, { error: 'Forbidden: Missing X-Requested-With header' });
+          }
+        }
+
         const session = getSessionFromRequest(req);
         if (!session || session.role !== 'admin') {
           return sendJson(res, 401, { error: 'Unauthorized: Admin authentication required' });
@@ -254,6 +430,12 @@ const server = http.createServer(async (req, res) => {
           return sendJson(res, 200, metrics);
         }
 
+        // Admin: List trashed articles (MUST be before /api/admin/articles/:id)
+        if (pathname === '/api/admin/articles/trash' && method === 'GET') {
+          const trashed = listTrashedArticles().map(formatArticle);
+          return sendJson(res, 200, trashed);
+        }
+
         // Admin: List all articles (including drafts & scheduled)
         if (pathname === '/api/admin/articles' && method === 'GET') {
           const status = parsedUrl.searchParams.get('status') || null;
@@ -263,7 +445,7 @@ const server = http.createServer(async (req, res) => {
 
           const rawArticles = listAllArticles({ status, search, limit, offset });
           const articles = rawArticles.map(formatArticle);
-          const totalCount = getDb().prepare('SELECT COUNT(*) as count FROM articles').get().count;
+          const totalCount = getDb().prepare('SELECT COUNT(*) as count FROM articles WHERE deleted_at IS NULL').get().count;
           return sendJson(res, 200, { articles, totalCount: Number(totalCount) });
         }
 
@@ -286,7 +468,7 @@ const server = http.createServer(async (req, res) => {
             title: body.title,
             slug,
             excerpt: body.excerpt || '',
-            content: body.content,
+            content: sanitizeHtml(body.content),
             featuredImage: body.featured_image || body.featuredImage || null,
             categoryId: body.category_id || body.categoryId || null,
             authorName: body.author_name || session.fullName,
@@ -294,10 +476,41 @@ const server = http.createServer(async (req, res) => {
             isFeatured: body.is_featured ? 1 : 0,
             seoTitle: body.seo_title || null,
             seoDescription: body.seo_description || null,
-            publishedAt: body.status === 'published' ? (body.published_at || new Date().toISOString()) : null
+            publishedAt: body.status === 'published' ? (body.published_at || new Date().toISOString()) : null,
+            language: body.language || 'hi',
+            translationOfId: body.translation_of_id || null,
+            expiresAt: body.expires_at || null
           });
 
           return sendJson(res, 201, created);
+        }
+
+        // Admin: Restore article from trash
+        if (pathname.match(/^\/api\/admin\/articles\/(\d+)\/restore$/) && method === 'POST') {
+          const id = parseInt(pathname.match(/^\/api\/admin\/articles\/(\d+)\/restore$/)[1], 10);
+          const restored = restoreArticle(id);
+          if (!restored) return sendJson(res, 404, { error: 'Article not found' });
+          return sendJson(res, 200, formatArticle(restored));
+        }
+
+        // Admin: Purge article permanently
+        if (pathname.match(/^\/api\/admin\/articles\/(\d+)\/purge$/) && method === 'DELETE') {
+          const id = parseInt(pathname.match(/^\/api\/admin\/articles\/(\d+)\/purge$/)[1], 10);
+          purgeArticle(id);
+          return sendJson(res, 200, { success: true });
+        }
+
+        // Admin: Toggle publish status
+        if (pathname.match(/^\/api\/admin\/articles\/(\d+)\/toggle-publish$/) && method === 'PATCH') {
+          const id = parseInt(pathname.match(/^\/api\/admin\/articles\/(\d+)\/toggle-publish$/)[1], 10);
+          const existing = getArticleById(id);
+          if (!existing) return sendJson(res, 404, { error: 'Article not found' });
+          const newStatus = existing.status === 'published' ? 'draft' : 'published';
+          const updated = updateArticle(id, {
+            status: newStatus,
+            publishedAt: newStatus === 'published' ? new Date().toISOString() : existing.published_at
+          });
+          return sendJson(res, 200, formatArticle(updated));
         }
 
         // Admin: Get single article for edit or draft preview
@@ -308,7 +521,7 @@ const server = http.createServer(async (req, res) => {
           return sendJson(res, 200, formatArticle(article));
         }
 
-        // Admin: Update article
+        // Admin: Update article (PUT)
         if (pathname.startsWith('/api/admin/articles/') && method === 'PUT') {
           const id = parseInt(pathname.replace('/api/admin/articles/', ''), 10);
           const body = await parseJsonBody(req);
@@ -316,7 +529,7 @@ const server = http.createServer(async (req, res) => {
             title: body.title,
             slug: body.slug,
             excerpt: body.excerpt,
-            content: body.content,
+            content: body.content !== undefined ? sanitizeHtml(body.content) : undefined,
             featuredImage: body.featured_image || body.featuredImage,
             categoryId: body.category_id || body.categoryId,
             authorName: body.author_name,
@@ -324,16 +537,33 @@ const server = http.createServer(async (req, res) => {
             isFeatured: body.is_featured,
             seoTitle: body.seo_title,
             seoDescription: body.seo_description,
-            publishedAt: body.published_at
+            publishedAt: body.published_at,
+            language: body.language,
+            translationOfId: body.translation_of_id,
+            expiresAt: 'expires_at' in body ? body.expires_at : undefined
           });
           if (!updated) return sendJson(res, 404, { error: 'Article not found' });
           return sendJson(res, 200, formatArticle(updated));
         }
 
-        // Admin: Delete article
+        // Admin: PATCH article (toggle publish / status update)
+        if (pathname.startsWith('/api/admin/articles/') && method === 'PATCH') {
+          const id = parseInt(pathname.replace('/api/admin/articles/', ''), 10);
+          const body = await parseJsonBody(req);
+          const existing = getArticleById(id);
+          if (!existing) return sendJson(res, 404, { error: 'Article not found' });
+          const newStatus = body.status || (existing.status === 'published' ? 'draft' : 'published');
+          const updated = updateArticle(id, {
+            status: newStatus,
+            publishedAt: newStatus === 'published' ? (body.published_at || new Date().toISOString()) : existing.published_at
+          });
+          return sendJson(res, 200, formatArticle(updated));
+        }
+
+        // Admin: Delete article (soft delete / trash)
         if (pathname.startsWith('/api/admin/articles/') && method === 'DELETE') {
           const id = parseInt(pathname.replace('/api/admin/articles/', ''), 10);
-          deleteArticle(id);
+          deleteArticle(id); // alias to trashArticle in Phase 3
           return sendJson(res, 200, { success: true });
         }
 
@@ -405,15 +635,36 @@ const server = http.createServer(async (req, res) => {
             return sendJson(res, 400, { error: 'dataBase64 and fileName required' });
           }
 
-          const ext = path.extname(body.fileName) || '.jpg';
+          const ext = (path.extname(body.fileName) || '').toLowerCase();
+          const allowedExts = ['.jpg', '.jpeg', '.png', '.webp'];
+          if (!allowedExts.includes(ext)) {
+            return sendJson(res, 400, { error: 'Only .jpg, .jpeg, .png, .webp files are allowed' });
+          }
+
+          const base64Data = body.dataBase64.replace(/^data:image\/\w+;base64,/, '');
+          const buffer = Buffer.from(base64Data, 'base64');
+
+          // Enforce 5 MB max
+          if (buffer.length > 5 * 1024 * 1024) {
+            return sendJson(res, 400, { error: 'File too large. Maximum size is 5 MB.' });
+          }
+
+          // Validate magic bytes
+          const isJpeg = buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+          const isPng = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+          const isWebp = buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46;
+          if (!isJpeg && !isPng && !isWebp) {
+            return sendJson(res, 400, { error: 'Invalid image file. Content does not match declared type.' });
+          }
+
           const safeName = `img_${Date.now()}_${crypto.randomBytes(4).toString('hex')}${ext}`;
           const targetPath = path.join(config.uploadDir, safeName);
-
-          const buffer = Buffer.from(body.dataBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
           fs.writeFileSync(targetPath, buffer);
 
           const publicUrl = `/uploads/${safeName}`;
-          return sendJson(res, 200, { url: publicUrl, fileName: safeName });
+          return sendJson(res, 200, { url: publicUrl, fileName: safeName }, {
+            'X-Content-Type-Options': 'nosniff'
+          });
         }
       }
 
@@ -454,6 +705,10 @@ const server = http.createServer(async (req, res) => {
 
 // Start listening
 server.listen(config.port, () => {
+  // Initialize sessions table and load persisted sessions
+  ensureSessionsTable();
+  loadSessionsFromDb();
+
   console.log(`\n======================================================`);
   console.log(`🚀 HisarKiAawaj Web Server is LIVE!`);
   console.log(`📡 Public News Portal : http://localhost:${config.port}`);
@@ -463,4 +718,5 @@ server.listen(config.port, () => {
   console.log(`======================================================\n`);
 });
 
+export { ensureSessionsTable, loadSessionsFromDb, sanitizeHtml };
 export default server;
