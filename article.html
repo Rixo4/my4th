@@ -500,37 +500,18 @@
         }) || [];
         // Exclude the currently viewed article
         articles = result.filter(a => a.slug !== currentSlug).slice(0, 2);
-      }
-      if (articles.length === 0) {
-        // Fallback — show from FALLBACK_ARTICLES (window scope not available here, use inline)
-        const fallbackItems = [
-          {
-            title: 'दुखद: पिता ने पढ़ाई के लिए डांटा तो 14 वर्षीय छात्रा ने फंदा लगा दी जान !',
-            slug: 'tragic-student-incident-hisar-oct-2026',
-            categories: { name: 'क्राइम' },
-            published_at: new Date(Date.now() - 86400000).toISOString(),
-            image: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400'
-          },
-          {
-            title: 'हिसार में सजेगी सुरों की महफ़िल: 24 अक्टूबर को होगा "DESIVERSE" का भव्य आयोजन',
-            slug: 'desiverse-cultural-music-fest-hisar-2026',
-            categories: { name: 'संस्कृति' },
-            published_at: new Date(Date.now() - 172800000).toISOString(),
-            image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400'
-          },
-          {
-            title: 'अवैध कॉलोनियों पर नगर निगम की बड़ी कार्रवाई, 14 निर्माण कार्यों पर रोक',
-            slug: 'municipal-unauthorized-construction-ban-oct-2026',
-            categories: { name: 'हिसार विशेष' },
-            published_at: new Date(Date.now() - 3 * 86400000).toISOString(),
-            image: 'https://images.unsplash.com/photo-1575505586569-646b2ca898fc?w=400'
-          }
-        ];
-        articles = fallbackItems.filter(a => a.slug !== currentSlug).slice(0, 2);
+      } else {
+        articles = [];
       }
 
       const grid = document.getElementById('relatedNewsGrid');
+      const section = document.querySelector('.related-stories-section') || grid?.closest('section');
       if (!grid) return;
+
+      if (articles.length === 0) {
+        if (section) section.style.display = 'none';
+        return;
+      }
 
       grid.innerHTML = articles.map(a => `
         <article class="regional-news-card" onclick="window.location.href='article.html?slug=${a.slug}'" style="cursor:pointer;">

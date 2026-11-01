@@ -182,7 +182,7 @@
     <div class="aajtak-breaking-bar">
       <span class="breaking-title-label">BREAKING NEWS</span>
       <div class="breaking-story-text" id="breakingTickerText" style="cursor: pointer;">
-        हिसार-रोहतक हाईवे पर नई रिंग रोड परियोजना को मिली मंज़ूरी, 210 एकड़ ज़मीन का अधिग्रहण अगले माह से होगा शुरू
+        हिसार की आवाज़ — निष्पक्ष, निडर और सटीक डिजिटल पत्रकारिता
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
         <button class="btn-pause-breaking" id="btnPauseBreaking" title="Pause / Play" style="color: #fff; font-size: 11px;">⏸</button>
@@ -198,16 +198,14 @@
     <div class="trending-slider-box">
       <button class="slider-nav-arrow" id="btnTrendPrev" title="Scroll left">‹</button>
       <div class="trending-pills-row" id="trendingPillsRow">
-        <a href="search.html?q=रिंग+रोड" class="topic-pill">#हिसार रिंग रोड</a>
-        <a href="category.html?slug=mandi-rates" class="topic-pill" style="border-color: #f59e0b; color: #b45309;">#सरसों ₹5450 मंडी भाव</a>
-        <a href="search.html?q=एयरपोर्ट" class="topic-pill">#हिसार एयरपोर्ट उड़ानें</a>
-        <a href="search.html?q=अस्पताल" class="topic-pill">#सिविल अस्पताल 50 बेड ICU</a>
-        <a href="search.html?q=DESIVERSE" class="topic-pill">#DESIVERSE 24 Oct</a>
-        <a href="search.html?q=रॉयल+एनफील्ड" class="topic-pill">#मलिक रॉयल एनफील्ड</a>
-        <a href="search.html?q=कैंसर+अस्पताल" class="topic-pill">#महात्मा गांधी कैंसर अस्पताल</a>
-        <a href="search.html?q=GJU" class="topic-pill">#GJU एआई कोर्सेज</a>
-        <a href="search.html?q=मौसम" class="topic-pill">#हरियाणा मौसम अपडेट</a>
-        <a href="search.html?q=पुलिस" class="topic-pill">#हिसार पुलिस जांच</a>
+        <a href="category.html?slug=hisar-special" class="topic-pill">#हिसार विशेष</a>
+        <a href="category.html?slug=haryana" class="topic-pill">#हरियाणा</a>
+        <a href="category.html?slug=crime" class="topic-pill">#क्राइम व जांच</a>
+        <a href="category.html?slug=mandi-rates" class="topic-pill" style="border-color: #f59e0b; color: #b45309;">#मंडी भाव</a>
+        <a href="category.html?slug=education" class="topic-pill">#शिक्षा व करियर</a>
+        <a href="category.html?slug=business" class="topic-pill">#कारोबार व बाजार</a>
+        <a href="category.html?slug=sports" class="topic-pill">#खेलकूद</a>
+        <a href="category.html?slug=lifestyle" class="topic-pill">#लाइफस्टाइल</a>
       </div>
       <button class="slider-nav-arrow" id="btnTrendNext" title="Scroll right">›</button>
     </div>
@@ -291,28 +289,8 @@
       <!-- LEFT STREAM (News Cards + In-Between Custom Ads) -->
       <section class="news-stream-column">
 
-        <!-- 1. SPOTLIGHT CARD (With authentic on-image sponsor badge) -->
-        <article class="spotlight-news-card" onclick="window.location.href='article.html?slug=hisar-outer-ring-road-project-approved-2026'" style="cursor: pointer;">
-          <div class="spotlight-image-holder">
-            <img src="https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=1200&q=80" alt="Spotlight News" class="spotlight-img">
-            <div class="spotlight-overlay"></div>
-            <span class="spotlight-kicker-tag">आज की बड़ी खबर</span>
-
-            <!-- On-Image Sponsor Banner (from Screenshot 2 "MALIK AUTOMOBILES") -->
-            <div class="on-image-sponsor-badge">
-              <span>SPONSORED BY: <b>MALIK AUTOMOBILES — ROYAL ENFIELD HISAR</b></span>
-              <span style="font-size: 10px; opacity: 0.9;">त्योहारी सीजन पर विशेष एक्सचेंज ऑफर · राजगुरु मार्केट</span>
-            </div>
-          </div>
-          <div class="spotlight-body">
-            <h2 class="spotlight-headline">हिसार-रोहतक हाईवे पर नई रिंग रोड परियोजना को मिली मंज़ूरी, 210 एकड़ ज़मीन का अधिग्रहण जल्द</h2>
-            <p class="spotlight-excerpt">शहर में भारी वाहनों के जाम से मुक्ति दिलाने के लिए 34 किमी लंबे नए ग्रीनफील्ड कॉरिडोर को अंतिम तकनीकी स्वीकृति मिल गई है। स्थानीय व्यापार मंडल ने इस फैसले का स्वागत किया है।</p>
-            <div class="spotlight-meta-footer">
-              <span>Nagar/Hisar Desk · स्थानीय ब्यूरो</span>
-              <span>🕒 2 घंटे पहले · 4 min read</span>
-            </div>
-          </div>
-        </article>
+        <!-- 1. SPOTLIGHT HERO (Populated dynamically from database) -->
+        <div id="spotlightContainer"></div>
 
         <!-- ==================================================================
              CUSTOM AD SLOT #2: Between Spotlight and News Grid (Full Width Banner)
@@ -336,113 +314,8 @@
           </a>
         </div>
 
-        <!-- 2. REGIONAL 2-COLUMN NEWS GRID (Clickable to full articles) -->
-        <div class="regional-news-grid" id="hisarNewsGrid">
-
-          <!-- Post 1 (Crime / Tragic Incident) -->
-          <article class="regional-news-card" onclick="window.location.href='article.html?slug=tragic-student-incident-hisar-oct-2026'" style="cursor: pointer;">
-            <div class="regional-img-box">
-              <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80" alt="News Incident" loading="lazy">
-              <span class="card-live-pill">LIVE BREAKING NEWS</span>
-            </div>
-            <div class="regional-card-content">
-              <span class="regional-category-tag">CRIME, HEALTH, LIFESTYLE, TOP NEWS</span>
-              <h3 class="regional-card-title">दुखद: पिता ने पढ़ाई के लिए डांटा तो 14 वर्षीय छात्रा ने फंदा लगा दी जान !</h3>
-              <div class="regional-card-meta">
-                <span>अक्टूबर 13, 2026</span>
-                <span style="color: var(--brand-red); font-weight: 700;">पूरी खबर ↗</span>
-              </div>
-            </div>
-          </article>
-
-          <!-- Post 2 (Domestic Dispute Incident) -->
-          <article class="regional-news-card" onclick="window.location.href='article.html?slug=wife-husband-dispute-investigation-oct-2026'" style="cursor: pointer;">
-            <div class="regional-img-box">
-              <img src="https://images.unsplash.com/photo-1584467735871-8e85353a8413?auto=format&fit=crop&w=600&q=80" alt="Police Investigation" loading="lazy">
-              <span class="card-live-pill">LIVE BREAKING NEWS</span>
-            </div>
-            <div class="regional-card-content">
-              <span class="regional-category-tag">CRIME, HEALTH, LIFESTYLE, TOP NEWS</span>
-              <h3 class="regional-card-title">पारिवारिक कलह में पत्नी ने बेलन, चिमटे से पीट फिर गला दबा की पति की हत्या !</h3>
-              <div class="regional-card-meta">
-                <span>अक्टूबर 12, 2026</span>
-                <span style="color: var(--brand-red); font-weight: 700;">पूरी खबर ↗</span>
-              </div>
-            </div>
-          </article>
-
-          <!-- Post 3 (Cultural Event) -->
-          <article class="regional-news-card" onclick="window.location.href='article.html?slug=desiverse-cultural-music-fest-hisar-2026'" style="cursor: pointer;">
-            <div class="regional-img-box">
-              <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80" alt="Music Concert" loading="lazy">
-              <span class="card-live-pill" style="background: #2563eb;">EVENT SPOTLIGHT</span>
-            </div>
-            <div class="regional-card-content">
-              <span class="regional-category-tag">CULTURE, MUSIC, ENTERTAINMENT</span>
-              <h3 class="regional-card-title">हिसार में सजेगी सुरों की महफ़िल: 24 अक्टूबर को होगा "DESIVERSE" का भव्य आयोजन, परमीश वर्मा बिखेरेंगे जलवा</h3>
-              <div class="regional-card-meta">
-                <span>अक्टूबर 11, 2026</span>
-                <span style="color: var(--brand-red); font-weight: 700;">पूरी खबर ↗</span>
-              </div>
-            </div>
-          </article>
-
-          <!-- ================================================================
-               CUSTOM AD SLOT #3: In-Feed Native Card Ad (Inside 2-Column Grid)
-               ================================================================ -->
-          <div class="infeed-card-ad" id="adSlotInfeedCard">
-            <div class="ad-slot-header" style="margin-bottom: 8px;">
-              <span class="ad-slot-label" style="color: var(--gold-accent);">⭐ प्रायोजित कार्ड · IN-FEED CARD AD</span>
-              <button class="btn-edit-ad-slot" onclick="openAdManagerForSlot('adSlotInfeedCard')">
-                ✏️ Change Ad
-              </button>
-            </div>
-            <a href="tel:9896011889" class="ad-banner-link" target="_blank" rel="noopener">
-              <div class="ad-visual-card homeopathic" style="padding: 14px; min-height: 140px;">
-                <div>
-                  <span class="ad-badge-tiny">LOCAL CLINIC</span>
-                  <h4 class="ad-visual-title" style="font-size: 15px;">जुनेजा होम्योपैथिक क्लिनिक</h4>
-                  <p class="ad-visual-subtitle">सेक्टर 14, हिसार · पुराना चर्म रोग व एलर्जी का स्थायी समाधान</p>
-                </div>
-                <span class="ad-cta-pill-white">परामर्श ↗</span>
-              </div>
-            </a>
-            <div style="font-size: 10px; color: var(--text-muted); margin-top: 8px; text-align: center;">
-              फोन: 98960-11889 · समय: सुबह 10:30 से शाम 7 बजे
-            </div>
-          </div>
-
-          <!-- Post 4 (Labor/Civil Story) -->
-          <article class="regional-news-card" onclick="window.location.href='article.html?slug=unpaid-salary-employee-case-oct-2026'" style="cursor: pointer;">
-            <div class="regional-img-box">
-              <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=600&q=80" alt="Worker Protest" loading="lazy">
-              <span class="card-live-pill">LIVE BREAKING NEWS</span>
-            </div>
-            <div class="regional-card-content">
-              <span class="regional-category-tag">CRIME, CIVIC, LABOUR</span>
-              <h3 class="regional-card-title">8 महीनो से तनख्वाह ना मिलने से परेशान कर्मचारी ने फांसी लगा दी जान, ट्रांसपोर्टर पर केस दर्ज !</h3>
-              <div class="regional-card-meta">
-                <span>अक्टूबर 10, 2026</span>
-                <span style="color: var(--brand-red); font-weight: 700;">पूरी खबर ↗</span>
-              </div>
-            </div>
-          </article>
-
-          <!-- Post 5 (Civic Action) -->
-          <article class="regional-news-card" onclick="window.location.href='article.html?slug=municipal-unauthorized-construction-ban-oct-2026'" style="cursor: pointer;">
-            <div class="regional-img-box">
-              <img src="https://images.unsplash.com/photo-1575505586569-646b2ca898fc?auto=format&fit=crop&w=600&q=80" alt="Civic Action" loading="lazy">
-            </div>
-            <div class="regional-card-content">
-              <span class="regional-category-tag">MUNICIPAL & INFRASTRUCTURE</span>
-              <h3 class="regional-card-title">अवैध कॉलोनियों को लेकर नगर निगम की सख्त कार्रवाई, 14 निर्माण कार्यों पर रोक के आदेश</h3>
-              <div class="regional-card-meta">
-                <span>अक्टूबर 09, 2026</span>
-                <span style="color: var(--brand-red); font-weight: 700;">पूरी खबर ↗</span>
-              </div>
-            </div>
-          </article>
-        </div>
+        <!-- 2. REGIONAL 2-COLUMN NEWS GRID (Populated dynamically from database) -->
+        <div class="regional-news-grid" id="hisarNewsGrid"></div>
 
         <!-- ==================================================================
              CUSTOM AD SLOT #4: In-Between News Rows Separator Banner
@@ -616,7 +489,7 @@
             <span>LIVE STREAM CONNECTED · 1080p HD</span>
           </div>
           <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(220, 38, 38, 0.9); padding: 6px 12px; font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden;">
-            🔴 ब्रेकिंग: हिसार आउटर रिंग रोड परियोजना को मिली कैबिनेट की मंजूरी · 210 एकड़ जमीन का होगा अधिग्रहण
+            🔴 हिसार की आवाज़ — निष्पक्ष, विश्वसनीय और डिजिटल स्टूडियो बुलेटिन
           </div>
         </div>
         <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
@@ -700,22 +573,10 @@
         <span class="public-modal-close" id="closeNotificationsModal">&times;</span>
       </div>
       <div class="public-modal-body">
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <a href="article.html?slug=hisar-outer-ring-road-project-approved-2026" style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; display: block; background: #fff1f2;">
-            <span style="font-size: 10px; background: var(--brand-red); color: #fff; padding: 2px 6px; border-radius: 3px; font-weight: 800;">ताज़ा अलर्ट</span>
-            <h5 style="font-size: 13px; font-weight: 800; margin: 6px 0 2px;">हिसार रिंग रोड: 210 एकड़ जमीन का अधिग्रहण अगले माह से होगा शुरू</h5>
-            <span style="font-size: 11px; color: var(--text-muted);">15 मिनट पहले</span>
-          </a>
-          <a href="category.html?slug=mandi-rates" style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; display: block; background: #fef8ee;">
-            <span style="font-size: 10px; background: #f59e0b; color: #fff; padding: 2px 6px; border-radius: 3px; font-weight: 800;">मंडी अपडेट</span>
-            <h5 style="font-size: 13px; font-weight: 800; margin: 6px 0 2px;">हिसार अनाज मंडी में सरसों का भाव ₹5,450 प्रति क्विंटल पहुंचा</h5>
-            <span style="font-size: 11px; color: var(--text-muted);">1 घंटा पहले</span>
-          </a>
-          <a href="article.html?slug=desiverse-cultural-music-fest-hisar-2026" style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; display: block;">
-            <span style="font-size: 10px; background: #2563eb; color: #fff; padding: 2px 6px; border-radius: 3px; font-weight: 800;">इवेंट</span>
-            <h5 style="font-size: 13px; font-weight: 800; margin: 6px 0 2px;">महावीर स्टेडियम में 24 अक्टूबर को DESIVERSE का भव्य संगीत महोत्सव</h5>
-            <span style="font-size: 11px; color: var(--text-muted);">3 घंटे पहले</span>
-          </a>
+        <div id="notificationsList" style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px;">
+            कोई नया अलर्ट नहीं है (No new alerts)
+          </div>
         </div>
       </div>
     </div>
@@ -733,16 +594,16 @@
       </div>
       <div class="public-modal-body">
         <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-          <input type="text" id="quickSearchInput" class="input-box" placeholder="कीवर्ड दर्ज करें जैसे: रिंग रोड, मंडी, पुलिस..." autofocus style="flex: 1;">
+          <input type="text" id="quickSearchInput" class="input-box" placeholder="कीवर्ड दर्ज करें जैसे: हिसार, मंडी, पुलिस, शिक्षा..." autofocus style="flex: 1;">
           <button class="btn-post-ad-primary" id="btnQuickSearchSubmit">खोजें</button>
         </div>
         <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">लोकप्रिय विषय:</div>
         <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-          <a href="search.html?q=रिंग+रोड" class="topic-pill" style="font-size: 11px;">#हिसार रिंग रोड</a>
+          <a href="category.html?slug=hisar-special" class="topic-pill" style="font-size: 11px;">#हिसार विशेष</a>
           <a href="category.html?slug=mandi-rates" class="topic-pill" style="font-size: 11px;">#मंडी भाव</a>
-          <a href="search.html?q=एयरपोर्ट" class="topic-pill" style="font-size: 11px;">#हिसार एयरपोर्ट</a>
-          <a href="search.html?q=अस्पताल" class="topic-pill" style="font-size: 11px;">#अस्पताल</a>
-          <a href="search.html?q=DESIVERSE" class="topic-pill" style="font-size: 11px;">#DESIVERSE</a>
+          <a href="category.html?slug=haryana" class="topic-pill" style="font-size: 11px;">#हरियाणा</a>
+          <a href="category.html?slug=crime" class="topic-pill" style="font-size: 11px;">#क्राइम व जांच</a>
+          <a href="category.html?slug=education" class="topic-pill" style="font-size: 11px;">#शिक्षा</a>
         </div>
       </div>
     </div>

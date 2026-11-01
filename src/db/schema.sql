@@ -21,6 +21,17 @@ CREATE TABLE IF NOT EXISTS categories (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Seed default categories if they do not exist
+INSERT OR IGNORE INTO categories (id, name, slug, description, order_index) VALUES
+  (1, 'हिसार विशेष', 'hisar-special', 'हिसार शहर की स्थानीय व मुख्य खबरें', 1),
+  (2, 'हरियाणा राज्य', 'haryana', 'हरियाणा राज्य की ताज़ा खबरें', 2),
+  (3, 'क्राइम व जांच', 'crime', 'पुलिस, न्यायालय व कानून व्यवस्था', 3),
+  (4, 'मंडी भाव', 'mandi-rates', 'अनाज व कृषि उपज मंडी के दैनिक भाव', 4),
+  (5, 'शिक्षा व करियर', 'education', 'बोर्ड परीक्षाएं, परिणाम व रोजगार समाचार', 5),
+  (6, 'कारोबार व बाजार', 'business', 'स्थानीय व्यापार व आर्थिक समाचार', 6),
+  (7, 'खेलकूद', 'sports', 'स्थानीय व राष्ट्रीय खेल प्रतियोगिताएं', 7),
+  (8, 'लाइफस्टाइल व संस्कृति', 'lifestyle', 'कला, संस्कृति व सामाजिक उत्सव', 8);
+
 -- 3. ARTICLES
 CREATE TABLE IF NOT EXISTS articles (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

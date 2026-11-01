@@ -114,6 +114,10 @@ window.switchToView = function(viewId) {
   // Trigger view data refresh
   if (viewId === 'viewDashboard') loadDashboardMetrics();
   if (viewId === 'viewManageNews') loadManageNews();
+  if (viewId === 'viewArticleEditor') {
+    const catSelect = document.getElementById('editorCategorySelect');
+    if (!catSelect || catSelect.children.length === 0) loadCategories();
+  }
   if (viewId === 'viewCategories') loadCategoriesTable();
   if (viewId === 'viewAdvertisements') loadAdvertisementsTable();
   if (viewId === 'viewTrash') loadTrashView();
@@ -534,9 +538,16 @@ window.insertInlineImagePrompt = function() {
 // ============================================================================
 async function loadCategories() {
   let categories = [];
-  if (window.HisarKiAawaj?.isSupabaseConfigured()) {
-    categories = await window.HisarKiAawaj.getCategories() || [];
-  } else {
+  try {
+    if (window.HisarKiAawaj?.isSupabaseConfigured()) {
+      categories = await window.HisarKiAawaj.getCategories() || [];
+    }
+  } catch (err) {
+    console.warn('Could not fetch categories from backend:', err);
+  }
+
+  // If no categories in DB yet, use standard fallback categories
+  if (!categories || categories.length === 0) {
     categories = getFallbackCategories();
   }
   adminState.categories = categories;
