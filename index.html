@@ -178,12 +178,10 @@
   <!-- ======================================================================
        HEADER LAYER 4: Red BREAKING NEWS Bar (Aaj Tak Style Capsule)
        ====================================================================== -->
-  <div class="container aajtak-breaking-container" id="breakingNewsContainer">
+  <div class="container aajtak-breaking-container" id="breakingNewsContainer" style="display: none;">
     <div class="aajtak-breaking-bar">
       <span class="breaking-title-label">BREAKING NEWS</span>
-      <div class="breaking-story-text" id="breakingTickerText" style="cursor: pointer;">
-        हिसार-रोहतक हाईवे पर नई रिंग रोड परियोजना को मिली मंज़ूरी, 210 एकड़ ज़मीन का अधिग्रहण अगले माह से होगा शुरू
-      </div>
+      <div class="breaking-story-text" id="breakingTickerText" style="cursor: pointer;"></div>
       <div style="display: flex; align-items: center; gap: 8px;">
         <button class="btn-pause-breaking" id="btnPauseBreaking" title="Pause / Play" style="color: #fff; font-size: 11px;">⏸</button>
         <button class="btn-close-breaking" id="btnCloseBreaking" title="Dismiss">&times;</button>
@@ -194,21 +192,10 @@
   <!-- ======================================================================
        HEADER LAYER 5: Trending Topic Pills Carousel (Aaj Tak Style)
        ====================================================================== -->
-  <div class="container trending-topics-section">
+  <div class="container trending-topics-section" style="display: none;">
     <div class="trending-slider-box">
       <button class="slider-nav-arrow" id="btnTrendPrev" title="Scroll left">‹</button>
-      <div class="trending-pills-row" id="trendingPillsRow">
-        <a href="search.html?q=रिंग+रोड" class="topic-pill">#हिसार रिंग रोड</a>
-        <a href="category.html?slug=mandi-rates" class="topic-pill" style="border-color: #f59e0b; color: #b45309;">#सरसों ₹5450 मंडी भाव</a>
-        <a href="search.html?q=एयरपोर्ट" class="topic-pill">#हिसार एयरपोर्ट उड़ानें</a>
-        <a href="search.html?q=अस्पताल" class="topic-pill">#सिविल अस्पताल 50 बेड ICU</a>
-        <a href="search.html?q=DESIVERSE" class="topic-pill">#DESIVERSE 24 Oct</a>
-        <a href="search.html?q=रॉयल+एनफील्ड" class="topic-pill">#मलिक रॉयल एनफील्ड</a>
-        <a href="search.html?q=कैंसर+अस्पताल" class="topic-pill">#महात्मा गांधी कैंसर अस्पताल</a>
-        <a href="search.html?q=GJU" class="topic-pill">#GJU एआई कोर्सेज</a>
-        <a href="search.html?q=मौसम" class="topic-pill">#हरियाणा मौसम अपडेट</a>
-        <a href="search.html?q=पुलिस" class="topic-pill">#हिसार पुलिस जांच</a>
-      </div>
+      <div class="trending-pills-row" id="trendingPillsRow"></div>
       <button class="slider-nav-arrow" id="btnTrendNext" title="Scroll right">›</button>
     </div>
   </div>
