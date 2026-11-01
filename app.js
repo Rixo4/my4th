@@ -60,19 +60,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupVisitorCounter();
   setupBackToTop();
 
-  // Admin session detection — show admin controls if logged-in admin visits any public page
-  if (window.HisarKiAawaj?.isSupabaseConfigured()) {
-    window.HisarKiAawaj.checkAdminSession().then(session => {
-      if (session) {
-        document.body.classList.add('is-admin-authenticated');
-        // Show Admin CMS link if it exists but was hidden via CSS
-        document.querySelectorAll('.btn-ad-manager-pill, .floating-ad-tool-pill').forEach(el => {
-          el.style.display = '';
-        });
-      }
-    }).catch(() => {});
-  }
-
   if (page === '' || page === 'index.html' || page === '/') {
     await initHomePage();
   } else if (page === 'category.html') {

@@ -39,10 +39,6 @@
 
       <div class="network-strip-right">
         <button class="city-pill-link" id="langToggleBtn" type="button" style="font-weight: 700;">EN / हिंदी</button>
-        <a href="admin/login.html" class="btn-signin-pill" title="Administrator Login">
-          <span>Admin Login</span>
-          <span>👤</span>
-        </a>
       </div>
     </div>
   </div>
@@ -73,11 +69,6 @@
       </div>
 
       <div class="masthead-actions-right">
-        <!-- Visible only if authenticated admin -->
-        <a href="admin/dashboard.html" class="btn-ad-manager-pill" title="Open Admin CMS Dashboard">
-          <span>⚙️</span>
-          <span>Admin CMS</span>
-        </a>
         <!-- Public Advertisement Inquiry Button -->
         <button class="btn-post-ad-primary" id="btnHeaderPostAd" title="विज्ञापन डेस्क से संपर्क करें">
           <span>📢</span>
@@ -587,7 +578,6 @@
       <a href="category.html?slug=business" class="mobile-drawer-link"><span>कारोबार व बाजार</span><span>›</span></a>
       <a href="category.html?slug=sports" class="mobile-drawer-link"><span>खेल समाचार</span><span>›</span></a>
       <a href="category.html?slug=lifestyle" class="mobile-drawer-link"><span>लाइफस्टाइल व संस्कृति</span><span>›</span></a>
-      <a href="admin/login.html" class="mobile-drawer-link" style="color: var(--brand-red);"><span>व्यवस्थापक लॉगिन (Admin Login)</span><span>👤</span></a>
     </div>
     <div class="mobile-drawer-districts">
       <div class="mobile-districts-title">हरियाणा के प्रमुख शहर (Districts)</div>
@@ -793,87 +783,6 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- ======================================================================
-       INTERACTIVE "PLACE YOUR ADS YOURSELF" MANAGEMENT MODAL (Admin Only)
-       ====================================================================== -->
-  <div class="modal-backdrop" id="adManagerModal">
-    <div class="modal-window">
-      <div class="modal-top-bar">
-        <h3 class="modal-title">⚙️ Ad Manager — खुद का विज्ञापन लगाएं / बदलें</h3>
-        <button class="btn-close-modal" aria-label="Close">&times;</button>
-      </div>
-
-      <div class="modal-content-area">
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
-          आप किसी भी विज्ञापन स्लॉट में अपनी कस्टम इमेज अपलोड कर सकते हैं, इमेज लिंक पेस्ट कर सकते हैं या तैयार स्थानीय टेम्पलेट्स चुन सकते हैं।
-        </p>
-
-        <div class="form-field">
-          <label for="targetAdSlotSelect">विज्ञापन स्थान चुनें (Target Ad Slot):</label>
-          <select id="targetAdSlotSelect" class="input-box">
-            <option value="adSlotTopLeaderboard">Top Leaderboard (970x90)</option>
-            <option value="adSlotBetweenHeroAndGrid">In-Feed Slot 1 (Between Spotlight & Grid)</option>
-            <option value="adSlotInfeedCard">In-Feed Native Card (Inside Grid)</option>
-            <option value="adSlotBetweenNewsRows">In-Feed Slot 2 (Between Post Rows 728x120)</option>
-            <option value="adSlotSidebarCarousel">Sidebar Ad Carousel (Right Panel)</option>
-            <option value="adSlotOurClients">Our Clients Showcase</option>
-          </select>
-        </div>
-
-        <!-- Option A: Upload Local Image File -->
-        <div class="form-field">
-          <label for="customAdFileInput">📁 अपने कंप्यूटर से इमेज फाइल अपलोड करें (Upload Image):</label>
-          <input type="file" id="customAdFileInput" accept="image/*" class="input-box" style="padding: 6px;">
-        </div>
-
-        <!-- Option B: Paste Image URL -->
-        <div class="form-field">
-          <label for="customAdUrlInput">🔗 अथवा इमेज URL पेस्ट करें (Or Image URL):</label>
-          <input type="text" id="customAdUrlInput" class="input-box" placeholder="https://example.com/ad-banner.jpg">
-        </div>
-
-        <!-- Option C: Choose Pre-Loaded Authentic Hisar Ads -->
-        <div class="form-field">
-          <label>⭐ अथवा तैयार स्थानीय हिसार विज्ञापन चुनें (Or Pick Preset):</label>
-          <div class="preset-ads-grid">
-            <button type="button" class="preset-ad-btn selected" data-preset="cancer_hospital">
-              🏥 महात्मा गांधी कैंसर अस्पताल (डॉ. रमेश बिश्नोई)
-            </button>
-            <button type="button" class="preset-ad-btn" data-preset="juneja_homeopathic">
-              🚗 1 - ड्राइवर | जुनेजा होम्योपैथिक क्लिनिक
-            </button>
-            <button type="button" class="preset-ad-btn" data-preset="plastic_surgery">
-              💉 सोनी प्लास्टिक सर्जरी हॉस्पिटल हिसार
-            </button>
-            <button type="button" class="preset-ad-btn" data-preset="royal_enfield">
-              🏍️ मलिक ऑटोमोबाइल्स रॉयल एनफील्ड हिसार
-            </button>
-          </div>
-        </div>
-
-        <div class="form-field">
-          <label for="customAdLinkInput">विज्ञापन क्लिक लिंक या व्हाट्सएप नंबर (Target Link):</label>
-          <input type="text" id="customAdLinkInput" class="input-box" placeholder="https://wa.me/919896011889 or tel:9896011889">
-        </div>
-
-        <div class="ad-preview-box" id="customAdPreviewBox" style="display: none;">
-          <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px;">इमेज प्रीव्यू (Live Preview):</div>
-          <img id="customAdPreviewImg" src="" alt="Ad Preview" class="ad-preview-img">
-        </div>
-
-        <button type="button" class="btn-post-ad-primary" id="btnSaveCustomAd" style="width: 100%; justify-content: center; padding: 12px; font-size: 14px;">
-          💾 विज्ञापन सेव करें व वेबसाइट पर लगाएं (Save & Apply Ad)
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- FLOATING AD INSPECTOR PILL (Admin only) -->
-  <div class="floating-ad-tool-pill" id="floatingAdToolBtn" title="Highlight all customizable ad slots">
-    <span>🎯</span>
-    <span>Show All Ad Slots</span>
   </div>
 
   <!-- ======================================================================

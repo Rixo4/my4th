@@ -11,6 +11,7 @@
     "start": "node src/server.js",
     "seed": "node scripts/seed.js",
     "test:baseline": "node scripts/verify-baseline.js",
+    "test:phase1": "node scripts/verify-phase1.js",
     "test:db": "node scripts/test-db.js",
     "test:server": "node scripts/probe-server.js"
   },
