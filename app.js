@@ -277,7 +277,7 @@ async function loadBreakingArticles() {
   }
 }
 
-function setupBreakingNewsTicker() {function setupBreakingNewsTicker() {
+function setupBreakingNewsTicker() {
   const container = document.getElementById('breakingNewsContainer');
   const tickerText = document.getElementById('breakingTickerText');
   const closeBtn = document.getElementById('btnCloseBreaking');
@@ -489,11 +489,14 @@ function renderNewsGridFromData(articles) {
 // Populate trending pills from actual article data
 function renderTrendingPillsFromArticles(articles) {
   const row = document.getElementById('trendingPillsRow');
+  const section = row?.closest('.trending-topics-section');
   if (!row) return;
   if (articles.length === 0) {
     row.innerHTML = '';
+    if (section) section.style.display = 'none';
     return;
   }
+  if (section) section.style.display = '';
 
   // Build unique trending tags from article titles
   const pills = articles.slice(0, 8).map(a => {
@@ -545,7 +548,7 @@ const CATEGORY_META = {
   'lifestyle':     { name: 'लाइफस्टाइल',    nameEn: 'Lifestyle',     desc: 'कला, संस्कृति, स्वास्थ्य, मनोरंजन और जनजीवन' },
 };
 
-let categoryOffset = 0;let categoryOffset = 0;
+let categoryOffset = 0;
 const CATEGORY_PAGE_SIZE = 8;
 
 async function initCategoryPage() {
