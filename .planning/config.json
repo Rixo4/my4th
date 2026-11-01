@@ -1,0 +1,10 @@
+{
+  "mode": "interactive",
+  "workflow": {
+    "auto_commit": false,
+    "tracer_first": true,
+    "verify_phases": true
+  },
+  "created_at": "2026-10-30T23:11:00Z"
+}
+

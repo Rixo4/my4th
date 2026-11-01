@@ -1,0 +1,25 @@
+{
+  "name": "hisarkiawaaj",
+  "version": "1.0.0",
+  "description": "Lightweight news portal backend and CMS for HisarKiAawaj",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "seed": "node scripts/seed.js",
+    "test:baseline": "node scripts/verify-baseline.js",
+    "test:db": "node scripts/test-db.js",
+    "test:server": "node scripts/probe-server.js"
+  },
+  "keywords": [
+    "news",
+    "cms",
+    "sqlite",
+    "nodejs"
+  ],
+  "author": "HisarKiAawaj",
+  "license": "MIT"
+}

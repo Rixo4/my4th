@@ -1,0 +1,38 @@
+================================================================================
+HISARKIAAWAJ — PROJECT PROGRESS TRACKER
+================================================================================
+
+[STATUS]: OPERATIONAL (Self-Hosted Option A Active)
+
+1. REPOSITORY ONBOARDING
+   - Successfully pulled customer frontend & admin CMS from GitHub (terabaapmc/hisarkiawaaj).
+   - Mapped architecture, tech stack, and data contract in .planning/codebase/.
+
+2. DATABASE & FOUNDATION (PHASE 1)
+   - Configured native SQLite database via Node's built-in node:sqlite (data/news.db).
+   - Created schemas: articles, categories, admin_users, advertisements.
+   - Built Scrypt password hashing & verification in src/db/auth.js.
+   - Created database seeder (scripts/seed.js).
+   - Ran 100% automated test suite (scripts/test-db.js) verifying draft isolation.
+
+3. REST API & BACKEND SERVER (PHASES 2, 3, 4, 5)
+   - Created lightweight zero-dependency web server in src/server.js.
+   - Implemented public endpoints (/api/articles, /api/categories, /api/ads).
+   - Implemented secure admin endpoints with HTTP-only session cookies.
+   - Built local image upload handler saving to /uploads.
+   - Updated supabase-client.js into a hybrid client that routes to local /api/* when running on the server.
+   - Ran integration probe test (scripts/probe-server.js) verifying all endpoints and security guards.
+
+HOW TO RUN:
+   npm start
+   (or: node src/server.js)
+
+ACCESS POINTS:
+   - Public Website : http://localhost:3000
+   - Admin Login    : http://localhost:3000/admin/login.html
+   - Admin Dashboard: http://localhost:3000/admin/dashboard.html
+
+DEFAULT ADMIN CREDENTIALS:
+   - Username / Email: admin@hisarkiaawaj.com
+   - Password        : Admin@12345
+
