@@ -163,6 +163,7 @@ export function updateArticle(id, fields) {
   const translationOfId = fields.translationOfId !== undefined ? fields.translationOfId : existing.translation_of_id;
   // expires_at: explicitly support null (clear) vs undefined (keep existing)
   const expiresAt   = 'expiresAt' in fields ? fields.expiresAt : existing.expires_at;
+  const deletedAt   = 'deletedAt' in fields ? fields.deletedAt : null;
 
   let publishedAt = existing.published_at;
   if (fields.publishedAt !== undefined) {
@@ -176,13 +177,15 @@ export function updateArticle(id, fields) {
     SET title = ?, slug = ?, excerpt = ?, content = ?,
         featured_image = ?, category_id = ?, author_name = ?,
         status = ?, is_featured = ?, seo_title = ?, seo_description = ?,
-        published_at = ?, language = ?, translation_of_id = ?, expires_at = ?
+        published_at = ?, language = ?, translation_of_id = ?, expires_at = ?,
+        deleted_at = ?
     WHERE id = ?
   `).run(
     title, slug, excerpt, content,
     featuredImage, categoryId, authorName,
     status, isFeatured, seoTitle, seoDescription,
     publishedAt, language, translationOfId, expiresAt,
+    deletedAt,
     id
   );
 

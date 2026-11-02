@@ -134,11 +134,8 @@ async function loadDashboardMetrics() {
     const res = await window.HisarKiAawaj.getAdminArticles({ pageSize: 50 });
     articles = res?.articles || [];
     ads = await window.HisarKiAawaj.getAdminAdvertisements() || [];
-  } else {
-    // Demonstration fallback data
-    articles = getFallbackArticles();
-    ads = getFallbackAds();
   }
+  // No fallback demo data — show empty state if backend unavailable
 
   adminState.articles = articles;
   adminState.advertisements = ads;
@@ -204,12 +201,8 @@ async function loadManageNews() {
   if (window.HisarKiAawaj?.isSupabaseConfigured()) {
     const res = await window.HisarKiAawaj.getAdminArticles({ status, search, categoryId, pageSize: 50 });
     articles = res?.articles || [];
-  } else {
-    articles = getFallbackArticles();
-    if (status) articles = articles.filter(a => a.status === status);
-    if (search) articles = articles.filter(a => a.title.toLowerCase().includes(search));
-    if (categoryId) articles = articles.filter(a => a.category_id === categoryId);
   }
+  // No demo fallback — only real DB articles shown
 
   const tbody = document.getElementById('manageNewsTbody');
   if (!tbody) return;
@@ -464,8 +457,6 @@ window.editArticle = async function(id) {
   let art = null;
   if (window.HisarKiAawaj?.isSupabaseConfigured()) {
     art = await window.HisarKiAawaj.getAdminArticleById(id);
-  } else {
-    art = getFallbackArticles().find(a => a.id === id);
   }
 
   if (!art) {
@@ -1121,123 +1112,13 @@ function getFallbackCategories() {
 }
 
 function getFallbackArticles() {
-  return [
-    {
-      id: 'art-1',
-      title: 'हिसार-रोहतक हाईवे पर नई रिंग रोड परियोजना को मिली मंज़ूरी, 210 एकड़ ज़मीन का अधिग्रहण जल्द',
-      slug: 'hisar-outer-ring-road-project-approved-2026',
-      excerpt: 'शहर में भारी वाहनों के जाम से मुक्ति दिलाने के लिए 34 किमी लंबे नए ग्रीनफील्ड कॉरिडोर को अंतिम तकनीकी स्वीकृति मिल गई है।',
-      content: '<p>हिसार शहर में बढ़ते भारी ट्रैफिक और जाम की समस्या से निपटने के लिए बहुप्रतीक्षित आउटर रिंग रोड परियोजना को सरकार से अंतिम तकनीकी व प्रशासनिक मंज़ूरी मिल गई है।</p>',
-      featured_image: 'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=1200&q=80',
-      category_id: 'cat-1',
-      categories: { name: 'हिसार विशेष', slug: 'hisar-special' },
-      status: 'published',
-      is_featured: true,
-      views_count: 2450,
-      published_at: new Date().toISOString()
-    },
-    {
-      id: 'art-2',
-      title: 'दुखद: पिता ने पढ़ाई के लिए डांटा तो 14 वर्षीय छात्रा ने फंदा लगा दी जान !',
-      slug: 'tragic-student-incident-hisar-oct-2026',
-      excerpt: 'नाबालिग छात्रा ने मानसिक तनाव में उठाया आत्मघाती कदम।',
-      content: '<p>हिसार के उपनगरीय इलाके में एक दिल दहला देने वाली घटना सामने आई है।</p>',
-      featured_image: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80',
-      category_id: 'cat-3',
-      categories: { name: 'क्राइम व जांच', slug: 'crime' },
-      status: 'published',
-      is_featured: false,
-      views_count: 1890,
-      published_at: new Date(Date.now() - 86400000).toISOString()
-    },
-    {
-      id: 'art-3',
-      title: 'हिसार में सजेगी सुरों की महफ़िल: 24 अक्टूबर को होगा "DESIVERSE" का भव्य आयोजन',
-      slug: 'desiverse-cultural-music-fest-hisar-2026',
-      excerpt: 'प्रसिद्ध गायक परमीश वर्मा बिखेरेंगे जलवा।',
-      content: '<p>हिसार में युवा उत्सव के तहत 24 अक्टूबर को प्रसिद्ध सांस्कृतिक कार्यक्रम DESIVERSE का आयोजन होगा।</p>',
-      featured_image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80',
-      category_id: 'cat-1',
-      categories: { name: 'हिसार विशेष', slug: 'hisar-special' },
-      status: 'published',
-      is_featured: false,
-      views_count: 1320,
-      published_at: new Date(Date.now() - 172800000).toISOString()
-    },
-    {
-      id: 'art-4',
-      title: 'हिसार एयरपोर्ट से अयोध्या व चंडीगढ़ के लिए सीधी उड़ानें अगले माह से प्रस्तावित',
-      slug: 'hisar-airport-ayodhya-chandigarh-flights-proposal',
-      excerpt: 'सुरक्षा ऑडिट पूरा होने के बाद टिकट बुकिंग शुरू होगी।',
-      content: '<p>महाराजा अग्रसेन हवाई अड्डे हिसार पर टर्मिनल 2 का कार्य अंतिम चरण में है।</p>',
-      featured_image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=800&q=80',
-      category_id: 'cat-2',
-      categories: { name: 'हरियाणा', slug: 'haryana' },
-      status: 'draft',
-      is_featured: false,
-      views_count: 0,
-      published_at: null
-    }
-  ];
+  return [];
 }
 
 function saveFallbackArticle(art) {
-  const articles = getFallbackArticles();
-  if (art.id) {
-    const idx = articles.findIndex(a => a.id === art.id);
-    if (idx !== -1) articles[idx] = art;
-  } else {
-    art.id = 'art_' + Date.now();
-    articles.unshift(art);
-  }
+  // no-op
 }
 
 function getFallbackAds() {
-  return [
-    {
-      id: 'ad-1',
-      name: 'Mahatma Gandhi Cancer Hospital Banner',
-      placement: 'top_leaderboard',
-      image_url: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=970&q=80',
-      destination_url: 'tel:9992487111',
-      sponsor_title: 'महात्मा गांधी कैंसर इंस्टीट्यूट हिसार',
-      is_active: true
-    },
-    {
-      id: 'ad-2',
-      name: 'Malik Royal Enfield Spotlight Infeed Banner',
-      placement: 'infeed_between_hero',
-      image_url: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=970&q=80',
-      destination_url: 'tel:01662200000',
-      sponsor_title: 'MALIK AUTOMOBILES — ROYAL ENFIELD',
-      is_active: true
-    },
-    {
-      id: 'ad-3',
-      name: 'Juneja Homeopathic Infeed Card Ad',
-      placement: 'infeed_card',
-      image_url: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80',
-      destination_url: 'tel:9896011889',
-      sponsor_title: 'जुनेजा होम्योपैथिक क्लिनिक',
-      is_active: true
-    },
-    {
-      id: 'ad-4',
-      name: 'Soni Plastic Surgery Hospital Infeed Separator',
-      placement: 'infeed_between_rows',
-      image_url: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=970&q=80',
-      destination_url: 'tel:9812000000',
-      sponsor_title: 'SONI BURN & PLASTIC SURGERY HOSPITAL',
-      is_active: true
-    },
-    {
-      id: 'ad-5',
-      name: 'Driver Hiring Carousel Ad',
-      placement: 'sidebar_carousel',
-      image_url: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=400&q=80',
-      destination_url: 'tel:9896011889',
-      sponsor_title: '1 - ड्राइवर आवश्यकता | जुनेजा होम्योपैथिक',
-      is_active: true
-    }
-  ];
+  return [];
 }

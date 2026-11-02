@@ -17,6 +17,7 @@ const appState = {
   highlightAds: false,
   publishedArticles: [],
   activeAds: [],
+  sidebarCarouselAds: [],
   breakingPaused: false,
   breakingIndex: 0,
   breakingItems: [],
@@ -377,11 +378,17 @@ function setupBackToTop() {
 // ============================================================================
 async function initHomePage() {
   setupAdManagerModal();
-  setupCarousel();
   setupFloatingAdTool();
 
   if (window.HisarKiAawaj?.isSupabaseConfigured()) {
     try {
+      // Load ads first so carousel can use them
+      const ads = await window.HisarKiAawaj.getActiveAdvertisements();
+      if (ads && ads.length > 0) {
+        appState.activeAds = ads;
+        renderAdvertisementsFromData(ads);
+      }
+
       const articles = await window.HisarKiAawaj.getPublicArticles({ limit: 12 });
       if (articles && articles.length > 0) {
         appState.publishedArticles = articles;
@@ -402,12 +409,6 @@ async function initHomePage() {
       } else {
         renderEmptyHomePageState();
       }
-
-      const ads = await window.HisarKiAawaj.getActiveAdvertisements();
-      if (ads && ads.length > 0) {
-        appState.activeAds = ads;
-        renderAdvertisementsFromData(ads);
-      }
     } catch (err) {
       console.warn('Backend load failed:', err);
       renderEmptyHomePageState();
@@ -417,6 +418,9 @@ async function initHomePage() {
     renderEmptyHomePageState();
     loadSavedAds();
   }
+
+  // Setup carousel after ads have been loaded
+  setupCarousel();
 }
 
 // Render Spotlight Hero from Database
@@ -531,19 +535,60 @@ function renderTrendingPillsFromArticles(articles) {
   row.innerHTML = pills.join('');
 }
 
-// Render Ads from Supabase Database
+// Render Ads from Database
 function renderAdvertisementsFromData(ads) {
+  const sidebarAds = [];
+  const ourClientAds = [];
+
   ads.forEach(ad => {
     const map = {
       top_leaderboard: 'adSlotTopLeaderboard',
       infeed_between_hero: 'adSlotBetweenHeroAndGrid',
       infeed_card: 'adSlotInfeedCard',
       infeed_between_rows: 'adSlotBetweenNewsRows',
-      sidebar_carousel: 'adSlotSidebarCarousel',
     };
-    const containerId = map[ad.placement];
-    if (containerId) applyLiveAdToSlot(containerId, ad);
+    if (ad.placement === 'sidebar_carousel') {
+      sidebarAds.push(ad);
+    } else if (ad.placement === 'our_clients') {
+      ourClientAds.push(ad);
+    } else {
+      const containerId = map[ad.placement];
+      if (containerId) applyLiveAdToSlot(containerId, ad);
+    }
   });
+
+  // Rebuild sidebar carousel from DB ads only
+  if (sidebarAds.length > 0) {
+    appState.sidebarCarouselAds = sidebarAds;
+  }
+
+  // Render "Our Clients" panel from DB
+  renderOurClientsFromAds(ourClientAds);
+}
+
+function renderOurClientsFromAds(ads) {
+  const panel = document.getElementById('adSlotOurClients');
+  const grid = document.getElementById('ourClientsGrid');
+  if (!panel) return;
+  if (!ads || ads.length === 0) {
+    panel.style.display = 'none';
+    return;
+  }
+  if (grid) {
+    grid.innerHTML = ads.map(ad => `
+      <div class="client-ad-item">
+        <a href="${ad.destination_url || '#'}" class="client-ad-link" target="_blank" rel="noopener"
+           style="display:block; padding: 10px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; text-decoration: none;">
+          ${ad.image_url
+            ? `<img src="${ad.image_url}" alt="${ad.name}" style="width:100%;height:60px;object-fit:cover;border-radius:6px;margin-bottom:6px;">`
+            : ''}
+          <div style="font-size: 12px; font-weight: 800; color: var(--text-dark);">${ad.name}</div>
+          ${ad.sponsor_title ? `<div style="font-size: 11px; color: #64748b;">${ad.sponsor_title}</div>` : ''}
+        </a>
+      </div>
+    `).join('');
+  }
+  panel.style.display = 'block';
 }
 
 function applyLiveAdToSlot(slotId, ad) {
@@ -557,6 +602,8 @@ function applyLiveAdToSlot(slotId, ad) {
   if (ad.image_url) {
     linkEl.innerHTML = `<img src="${ad.image_url}" alt="${ad.name}" style="width:100%;object-fit:cover;border-radius:8px;max-height:120px;">`;
   }
+  // Show the container now that it has a live ad
+  container.style.display = '';
 }
 
 // ============================================================================
@@ -1003,58 +1050,57 @@ function applyAdToSlot(slotId, adData) {
 }
 
 // ============================================================================
-// 14. SIDEBAR CAROUSEL
+// 14. SIDEBAR CAROUSEL — loaded exclusively from admin advertisements DB
 // ============================================================================
 function setupCarousel() {
   const prevBtn = document.getElementById('sidebarCarouselPrev');
   const nextBtn = document.getElementById('sidebarCarouselNext');
   const counterEl = document.getElementById('sidebarCarouselCounter');
+  const bottomLabel = document.getElementById('sidebarCarouselBottomLabel');
   const bannerLink = document.getElementById('sidebarAdBannerLink');
+  const carouselCard = document.getElementById('adSlotSidebarCarousel');
 
-  const carouselItems = [
-    { title: '1 - ड्राइवर आवश्यकता | जुनेजा होम्योपैथिक क्लिनिक', sub: 'सेक्टर-14, हिसार | 98960-11889', theme: 'homeopathic', link: 'tel:9896011889' },
-    { title: 'महात्मा गांधी इंस्टीट्यूट ऑफ मेडिकल साइंसेज', sub: 'कैंसर रोग विशेषज्ञ डॉ. रमेश बिश्नोई | 99924-87111', theme: 'cancer-hospital', link: 'tel:9992487111' },
-    { title: 'SONI BURN & PLASTIC SURGERY HOSPITAL', sub: 'Sudarshan Medspa | डॉ. सुनील सोनी, मॉडल टाउन हिसार', theme: 'plastic-surgery', link: 'tel:9812000000' },
-    { title: 'MALIK AUTOMOBILES — ROYAL ENFIELD', sub: 'त्योहारी सीजन पर विशेष ऑफर | हिसार', theme: 'royal-enfield', link: 'tel:01662200000' },
-    { title: 'स्प्रिंगफील्ड वर्ल्ड स्कूल हिसार', sub: 'सत्र 2026-27 प्रवेश प्रारंभ | दिल्ली रोड हिसार', theme: 'cancer-hospital', link: '#' },
-    { title: 'कल्याण ज्वेलर्स हिसार', sub: 'मेकिंग चार्ज पर 25% छूट | राजगुरु मार्केट हिसार', theme: 'homeopathic', link: '#' },
-  ];
+  // Use ads already loaded into appState.sidebarCarouselAds (set in renderAdvertisementsFromData)
+  // or filter from activeAds
+  let carouselAds = (appState.sidebarCarouselAds || []).length > 0
+    ? appState.sidebarCarouselAds
+    : (appState.activeAds || []).filter(a => a.placement === 'sidebar_carousel');
 
-  // Prefer live Supabase ads if available
-  if (appState.activeAds.length > 0) {
-    const sidebarAds = appState.activeAds.filter(a => a.placement === 'sidebar_carousel');
-    if (sidebarAds.length > 0) {
-      sidebarAds.forEach((ad, i) => {
-        carouselItems[i] = {
-          title: ad.name, sub: ad.sponsor_subtitle || '', theme: 'cancer-hospital', link: ad.destination_url || '#',
-        };
-      });
-    }
+  if (carouselAds.length === 0) {
+    // No ads configured — hide the sidebar carousel card
+    if (carouselCard) carouselCard.style.display = 'none';
+    return;
   }
 
+  if (carouselCard) carouselCard.style.display = '';
+
   function update() {
-    const item = carouselItems[appState.sidebarCarouselIndex - 1];
-    if (!item) return;
-    if (counterEl) counterEl.textContent = `${appState.sidebarCarouselIndex}/${carouselItems.length}`;
+    const ad = carouselAds[appState.sidebarCarouselIndex - 1];
+    if (!ad) return;
+    const total = carouselAds.length;
+    if (counterEl) counterEl.textContent = `${appState.sidebarCarouselIndex}/${total}`;
+    if (bottomLabel) bottomLabel.textContent = `विज्ञापन संख्या ${appState.sidebarCarouselIndex}/${total}`;
     if (bannerLink) {
-      bannerLink.href = item.link || '#';
-      bannerLink.innerHTML = `
-        <div class="ad-visual-card ${item.theme}" style="min-height:140px;padding:18px;">
-          <div>
-            <span class="ad-badge-tiny">LOCAL PARTNER</span>
-            <h4 class="ad-visual-title" style="font-size:15px;">${item.title}</h4>
-            <p class="ad-visual-subtitle">${item.sub}</p>
-          </div>
-        </div>`;
+      bannerLink.href = ad.destination_url || '#';
+      if (ad.image_url) {
+        bannerLink.innerHTML = `<img src="${ad.image_url}" alt="${ad.name}" style="width:100%;border-radius:8px;object-fit:cover;max-height:160px;">`;
+      } else {
+        bannerLink.innerHTML = `
+          <div style="min-height:140px;padding:18px;background:#f8fafc;border-radius:8px;display:flex;flex-direction:column;justify-content:center;">
+            <span style="font-size:10px;text-transform:uppercase;color:#94a3b8;font-weight:700;">LOCAL PARTNER</span>
+            <h4 style="font-size:15px;font-weight:800;color:var(--text-dark);margin:6px 0 4px;">${ad.name}</h4>
+            <p style="font-size:12px;color:#64748b;">${ad.sponsor_title || ad.sponsor_subtitle || ''}</p>
+          </div>`;
+      }
     }
   }
 
   prevBtn?.addEventListener('click', () => {
-    appState.sidebarCarouselIndex = appState.sidebarCarouselIndex > 1 ? appState.sidebarCarouselIndex - 1 : carouselItems.length;
+    appState.sidebarCarouselIndex = appState.sidebarCarouselIndex > 1 ? appState.sidebarCarouselIndex - 1 : carouselAds.length;
     update();
   });
   nextBtn?.addEventListener('click', () => {
-    appState.sidebarCarouselIndex = appState.sidebarCarouselIndex < carouselItems.length ? appState.sidebarCarouselIndex + 1 : 1;
+    appState.sidebarCarouselIndex = appState.sidebarCarouselIndex < carouselAds.length ? appState.sidebarCarouselIndex + 1 : 1;
     update();
   });
 
@@ -1062,7 +1108,7 @@ function setupCarousel() {
 
   // Auto-advance every 5 seconds
   setInterval(() => {
-    appState.sidebarCarouselIndex = appState.sidebarCarouselIndex < carouselItems.length ? appState.sidebarCarouselIndex + 1 : 1;
+    appState.sidebarCarouselIndex = appState.sidebarCarouselIndex < carouselAds.length ? appState.sidebarCarouselIndex + 1 : 1;
     update();
   }, 5000);
 }

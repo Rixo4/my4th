@@ -213,24 +213,10 @@
 
   <!-- ======================================================================
        CUSTOM AD SLOT #1: Top Leaderboard (970x90 / 728x90)
+       Populated dynamically from admin advertisements
        ====================================================================== -->
-  <div class="container custom-ad-slot-container" id="adSlotTopLeaderboard">
-    <div class="ad-slot-header">
-      <span class="ad-slot-label">शीर्ष लीडरबोर्ड विज्ञापन · ADVERTISEMENT (970x90)</span>
-      <button class="btn-edit-ad-slot" onclick="openAdManagerForSlot('adSlotTopLeaderboard')">
-        ✏️ Change Ad Image
-      </button>
-    </div>
-    <a href="tel:9992487111" class="ad-banner-link" target="_blank" rel="noopener">
-      <div class="ad-visual-card cancer-hospital">
-        <div>
-          <span class="ad-badge-tiny">HEALTHCARE PARTNER · HISAR</span>
-          <h4 class="ad-visual-title">महात्मा गांधी इंस्टीट्यूट ऑफ मेडिकल साइंसेज हिसार</h4>
-          <p class="ad-visual-subtitle">AIIMS दिल्ली व टाटा मेमोरियल अस्पताल मुंबई से प्रशिक्षित, सुप्रसिद्ध कैंसर रोग विशेषज्ञ डॉ. रमेश बिश्नोई · 99924-87111</p>
-        </div>
-        <span class="ad-cta-pill-white">परामर्श लें ↗</span>
-      </div>
-    </a>
+  <div class="container custom-ad-slot-container" id="adSlotTopLeaderboard" style="display:none;">
+    <a href="#" class="ad-banner-link" target="_blank" rel="noopener"></a>
   </div>
 
   <main class="container">
@@ -293,25 +279,11 @@
         <div id="spotlightContainer"></div>
 
         <!-- ==================================================================
-             CUSTOM AD SLOT #2: Between Spotlight and News Grid (Full Width Banner)
+             CUSTOM AD SLOT #2: Between Spotlight and News Grid
+             Populated dynamically from admin advertisements
              ================================================================== -->
-        <div class="custom-ad-slot-container" id="adSlotBetweenHeroAndGrid">
-          <div class="ad-slot-header">
-            <span class="ad-slot-label">पोस्ट के बीच विज्ञापन स्लॉट-1 · IN-FEED AD BANNER</span>
-            <button class="btn-edit-ad-slot" onclick="openAdManagerForSlot('adSlotBetweenHeroAndGrid')">
-              ✏️ Place Custom Ad Image Here
-            </button>
-          </div>
-          <a href="tel:01662200000" class="ad-banner-link" target="_blank" rel="noopener">
-            <div class="ad-visual-card royal-enfield">
-              <div>
-                <span class="ad-badge-tiny">AUTOMOTIVE SPONSOR · HISAR</span>
-                <h4 class="ad-visual-title">MALIK AUTOMOBILES — ROYAL ENFIELD HISAR</h4>
-                <p class="ad-visual-subtitle">बुलेट, हंटर व क्लासिक 350 पर आकर्षक फेस्टिव फाइनेंस व 0% प्रोसेसिंग फीस ऑफर · दिल्ली रोड, हिसार</p>
-              </div>
-              <span class="ad-cta-pill-white">टेस्ट राइड बुक करें ↗</span>
-            </div>
-          </a>
+        <div class="custom-ad-slot-container" id="adSlotBetweenHeroAndGrid" style="display:none;">
+          <a href="#" class="ad-banner-link" target="_blank" rel="noopener"></a>
         </div>
 
         <!-- 2. REGIONAL 2-COLUMN NEWS GRID (Populated dynamically from database) -->
@@ -320,23 +292,9 @@
         <!-- ==================================================================
              CUSTOM AD SLOT #4: In-Between News Rows Separator Banner
              ================================================================== -->
-        <div class="custom-ad-slot-container" id="adSlotBetweenNewsRows">
-          <div class="ad-slot-header">
-            <span class="ad-slot-label">पोस्ट के बीच विज्ञापन स्लॉट-2 · IN-FEED SEPARATOR (728x120)</span>
-            <button class="btn-edit-ad-slot" onclick="openAdManagerForSlot('adSlotBetweenNewsRows')">
-              ✏️ Place Custom Ad Image Here
-            </button>
-          </div>
-          <a href="tel:9812000000" class="ad-banner-link" target="_blank" rel="noopener">
-            <div class="ad-visual-card plastic-surgery">
-              <div>
-                <span class="ad-badge-tiny">SURGICAL & COSMETIC SPECIALITY</span>
-                <h4 class="ad-visual-title">SONI BURN & PLASTIC SURGERY HOSPITAL HISAR</h4>
-                <p class="ad-visual-subtitle">Sudarshan Medspa · डॉ. सुनील सोनी · बर्न केयर, हेयर ट्रांसप्लांट व आधुनिक लेजर सर्जरी · मॉडल टाउन हिसार</p>
-              </div>
-              <span class="ad-cta-pill-white">कॉल करें: 98120-XXXXX ↗</span>
-            </div>
-          </a>
+                <!-- CUSTOM AD SLOT #4: In-Between News Rows - populated from admin -->
+        <div class="custom-ad-slot-container" id="adSlotBetweenNewsRows" style="display:none;">
+          <a href="#" class="ad-banner-link" target="_blank" rel="noopener"></a>
         </div>
 
       </section>
@@ -350,7 +308,7 @@
             <span class="ad-slot-label">प्रायोजित विज्ञापन · SPONSORED</span>
             <div style="display: flex; align-items: center; gap: 8px;">
               <button class="carousel-nav-btn" id="sidebarCarouselPrev" title="Previous Ad">❮</button>
-              <span class="carousel-counter" id="sidebarCarouselCounter">3/6</span>
+              <span class="carousel-counter" id="sidebarCarouselCounter">-</span>
               <button class="carousel-nav-btn" id="sidebarCarouselNext" title="Next Ad">❯</button>
             </div>
           </div>
@@ -360,7 +318,7 @@
           </a>
 
           <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 10px; color: var(--text-light);">विज्ञापन संख्या 3/6</span>
+            <span style="font-size: 10px; color: var(--text-light);" id="sidebarCarouselBottomLabel"></span>
             <button class="btn-edit-ad-slot" onclick="openAdManagerForSlot('adSlotSidebarCarousel')">
               ✏️ Change Ad Image
             </button>
@@ -368,45 +326,12 @@
         </div>
 
         <!-- "OUR CLIENTS / हमारे स्थानीय प्रायोजक" -->
-        <div class="our-clients-panel" id="adSlotOurClients">
+                <!-- OUR CLIENTS: populated dynamically from admin advertisements (placement: our_clients) -->
+        <div class="our-clients-panel" id="adSlotOurClients" style="display:none;">
           <div class="panel-heading-row">
             <h3 class="panel-title">Our Clients / हमारे प्रायोजक</h3>
-            <button class="btn-edit-ad-slot" onclick="openAdManagerForSlot('adSlotOurClients')">
-              ✏️ Add / Edit
-            </button>
           </div>
-
-          <div class="clients-ad-grid">
-            <!-- Client Ad 1: Mahatma Gandhi Cancer Hospital -->
-            <div class="client-ad-item">
-              <a href="tel:9992487111" class="ad-visual-card cancer-hospital" style="padding: 12px; min-height: 85px; display: block;">
-                <div>
-                  <h5 style="font-size: 13px; font-weight: 800;">महात्मा गांधी कैंसर इंस्टीट्यूट</h5>
-                  <p style="font-size: 10px; opacity: 0.9;">डॉ. रमेश बिश्नोई · फोन: 99924-87111</p>
-                </div>
-              </a>
-            </div>
-
-            <!-- Client Ad 2: Soni Hospital -->
-            <div class="client-ad-item">
-              <a href="tel:9812000000" class="ad-visual-card plastic-surgery" style="padding: 12px; min-height: 85px; display: block;">
-                <div>
-                  <h5 style="font-size: 13px; font-weight: 800;">सोनी बर्न एवं प्लास्टिक सर्जरी हॉस्पिटल</h5>
-                  <p style="font-size: 10px; opacity: 0.9;">सुदर्शन मेडस्पा, मॉडल टाउन हिसार</p>
-                </div>
-              </a>
-            </div>
-
-            <!-- Client Ad 3: Malik Automobiles -->
-            <div class="client-ad-item">
-              <a href="tel:01662200000" class="ad-visual-card royal-enfield" style="padding: 12px; min-height: 85px; display: block;">
-                <div>
-                  <h5 style="font-size: 13px; font-weight: 800;">मलिक ऑटोमोबाइल्स रॉयल एनफील्ड</h5>
-                  <p style="font-size: 10px; opacity: 0.9;">दिल्ली रोड, हिसार</p>
-                </div>
-              </a>
-            </div>
-          </div>
+          <div class="clients-ad-grid" id="ourClientsGrid"></div>
         </div>
 
         <!-- WHATSAPP COMMUNITY CARD -->
