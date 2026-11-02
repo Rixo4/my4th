@@ -220,6 +220,16 @@ async function restoreArticle(id) {
   return data;
 }
 
+async function togglePublishArticle(id) {
+  const res = await fetch(`/api/admin/articles/${id}/toggle-publish`, {
+    method: 'PATCH',
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to toggle publish status');
+  return data;
+}
+
 async function purgeArticle(id) {
   const res = await fetch(`/api/admin/articles/${id}/purge`, {
     method: 'DELETE',
@@ -316,6 +326,7 @@ window.HisarKiAawaj = {
   deleteArticle,
   getTrashedArticles,
   restoreArticle,
+  togglePublishArticle,
   purgeArticle,
   getCategories,
   saveCategory,

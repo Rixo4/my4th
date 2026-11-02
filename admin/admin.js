@@ -244,7 +244,13 @@ async function loadManageNews() {
       <td style="color: #64748b; font-size: 12px;">${formatDate(art.published_at || art.created_at)}</td>
       <td style="font-weight: 700; font-size: 12px; color: #475569;">${(art.views_count || 0).toLocaleString()}</td>
       <td style="text-align: right;">
-        <div class="action-buttons-group" style="justify-content: flex-end;">
+        <div class="action-buttons-group" style="justify-content: flex-end; gap: 6px;">
+          <button class="btn-table-action ${art.status === 'published' ? 'action-unpublish' : 'action-publish'}" 
+                  title="${art.status === 'published' ? 'Unpublish to Draft' : 'Publish Immediately'}" 
+                  onclick="togglePublishArticle('${art.id}')"
+                  style="${art.status === 'published' ? 'background:#fef3c7;color:#b45309;border:1px solid #fde68a;' : 'background:#dcfce7;color:#15803d;border:1px solid #86efac;'}font-weight:700;font-size:11px;padding:4px 8px;">
+            ${art.status === 'published' ? '⏸️ Unpublish' : '🚀 Publish'}
+          </button>
           <a href="../article.html?slug=${art.slug}" target="_blank" class="btn-table-action" title="View Public Post">👁️</a>
           <button class="btn-table-action" title="Edit Article" onclick="editArticle('${art.id}')">✏️</button>
           <button class="btn-table-action delete" title="Move to Trash" onclick="promptDelete('article', '${art.id}', '${escapeQuotes(art.title)}')">🗑️</button>
@@ -429,6 +435,36 @@ function setupArticleEditor() {
     }
   });
 }
+
+// Explicit Status Trigger (Publish vs Draft buttons)
+window.saveArticleWithExplicitStatus = function(targetStatus) {
+  const statusSelect = document.getElementById('editorStatusSelect');
+  if (statusSelect) statusSelect.value = targetStatus;
+
+  const dateInput = document.getElementById('editorPublishDate');
+  if (targetStatus === 'published' && dateInput && !dateInput.value) {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    dateInput.value = now.toISOString().slice(0, 16);
+  }
+
+  const submitBtn = document.getElementById('btnSaveArticleSubmit');
+  if (submitBtn) submitBtn.click();
+};
+
+// Instant Toggle Publish / Unpublish from Table
+window.togglePublishArticle = async function(id) {
+  try {
+    if (window.HisarKiAawaj?.isSupabaseConfigured()) {
+      const updated = await window.HisarKiAawaj.togglePublishArticle(id);
+      showAdminToast(updated.status === 'published' ? '🚀 Article published live!' : '⏸ Article reverted to draft.');
+      await loadManageNews();
+      await loadDashboardMetrics();
+    }
+  } catch (err) {
+    alert('Failed to toggle article status: ' + err.message);
+  }
+};
 
 // Reset Editor for adding new article
 window.resetArticleEditor = function() {

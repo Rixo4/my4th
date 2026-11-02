@@ -366,10 +366,14 @@
 
               <!-- Actions Box -->
               <div class="content-box-card" style="padding: 16px;">
-                <button type="submit" class="btn-add-primary" style="width: 100%; justify-content: center; padding: 12px; font-size: 14px;" id="btnSaveArticleSubmit">
-                  💾 Save & Publish Article
+                <button type="button" class="btn-add-primary" style="width: 100%; justify-content: center; padding: 12px; font-size: 14px; background: #16a34a; margin-bottom: 8px;" id="btnPublishNow" onclick="saveArticleWithExplicitStatus('published')">
+                  🚀 Publish Immediately (Live on Site)
                 </button>
-                <button type="button" class="btn-public-site-link" style="width: 100%; justify-content: center; margin-top: 8px;" onclick="switchToView('viewManageNews')">
+                <button type="button" class="btn-public-site-link" style="width: 100%; justify-content: center; padding: 10px; font-size: 13px; font-weight: 700; margin-bottom: 8px;" id="btnSaveDraft" onclick="saveArticleWithExplicitStatus('draft')">
+                  💾 Save as Draft (Unpublished)
+                </button>
+                <button type="submit" id="btnSaveArticleSubmit" style="display: none;"></button>
+                <button type="button" class="btn-public-site-link" style="width: 100%; justify-content: center;" onclick="switchToView('viewManageNews')">
                   Cancel / Back to List
                 </button>
               </div>
