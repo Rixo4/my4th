@@ -430,7 +430,7 @@ function renderSpotlightFromData(articles) {
     return;
   }
 
-  const categoryName = spotlight.categories?.name || 'हिसार विशेष';
+  const categoryName = spotlight.category_name || spotlight.categories?.name || 'हिसार विशेष';
   const imgUrl = spotlight.featured_image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200';
 
   container.innerHTML = `
@@ -487,10 +487,10 @@ function renderNewsGridFromData(articles) {
       <div class="regional-img-box">
         <img src="${art.featured_image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600'}"
              alt="${art.title}" loading="lazy">
-        <span class="card-live-pill">${art.categories?.name || 'हिसार'}</span>
+        <span class="card-live-pill">${art.category_name || art.categories?.name || 'हिसार विशेष'}</span>
       </div>
       <div class="regional-card-content">
-        <span class="regional-category-tag">${art.categories?.name || 'हिसार विशेष'}</span>
+        <span class="regional-category-tag">${art.category_name || art.categories?.name || 'हिसार विशेष'}</span>
         <h3 class="regional-card-title">${art.title}</h3>
         <div class="regional-card-meta">
           <span>${formatDate(art.published_at || art.created_at)}</span>
@@ -775,10 +775,10 @@ async function loadCategoryArticles(slug, append = false) {
       <div class="regional-img-box">
         <img src="${art.featured_image || 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600'}"
              alt="${art.title}" loading="lazy">
-        <span class="card-live-pill">${art.categories?.name || 'हिसार'}</span>
+        <span class="card-live-pill">${art.category_name || art.categories?.name || 'हिसार विशेष'}</span>
       </div>
       <div class="regional-card-content">
-        <span class="regional-category-tag">${art.categories?.name || 'हिसार विशेष'}</span>
+        <span class="regional-category-tag">${art.category_name || art.categories?.name || 'हिसार विशेष'}</span>
         <h3 class="regional-card-title">${art.title}</h3>
         <div class="regional-card-meta">
           <span>${formatDate(art.published_at || art.created_at)}</span>
@@ -882,7 +882,7 @@ async function initSearchPage() {
            alt="${art.title}" loading="lazy">
       <div>
         <div style="margin-bottom:4px;">
-          <span class="regional-category-tag">${art.categories?.name || 'हिसार'}</span>
+          <span class="regional-category-tag">${art.category_name || art.categories?.name || 'हिसार विशेष'}</span>
           <span style="font-size:11px;color:var(--text-muted);margin-left:8px;">${formatDate(art.published_at)}</span>
         </div>
         <h3 class="search-result-headline">${highlight(art.title, query)}</h3>

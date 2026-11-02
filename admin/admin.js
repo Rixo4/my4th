@@ -66,7 +66,7 @@ function setupStatusIndicator() {
 
   if (isConfigured) {
     pill.className = 'connection-status-pill connected';
-    text.textContent = 'Database Connected (Live)';
+    text.textContent = 'System Online · SQLite Active';
   } else {
     pill.className = 'connection-status-pill';
     text.textContent = 'Demo Mode (Keys Needed)';

@@ -229,32 +229,32 @@ img {
 }
 
 .express-brand-seal {
-  width: 44px;
-  height: 44px;
-  background: linear-gradient(135deg, #c5162d, #8f0c1e);
+  width: 40px;
+  height: 40px;
+  background: var(--brand-red);
   color: #ffffff;
-  border-radius: 12px;
+  border-radius: 4px;
   display: grid;
   place-items: center;
   font-family: var(--font-hindi);
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 900;
-  box-shadow: 0 4px 12px rgba(197, 22, 45, 0.3);
-  transform: rotate(-3deg);
+  box-shadow: none;
+  transform: none;
   transition: var(--transition);
 }
 
 .express-brand-link:hover .express-brand-seal {
-  transform: rotate(0) scale(1.06);
+  background: var(--brand-red-dark);
 }
 
 .express-brand-text {
   font-family: var(--font-serif);
-  font-size: 44px;
-  font-weight: 900;
+  font-size: 38px;
+  font-weight: 800;
   line-height: 1;
-  color: #0f141c;
-  letter-spacing: -1.2px;
+  color: #0f172a;
+  letter-spacing: -0.5px;
 }
 
 .express-brand-text span {
@@ -322,12 +322,13 @@ img {
    HEADER LAYER 3: Deep Navy Main Navigation Bar (Aaj Tak Inspired)
    ========================================================================== */
 .aajtak-navbar {
-  background: var(--aajtak-navy);
+  background: #0f172a;
   color: #ffffff;
   position: sticky;
   top: 0;
   z-index: 300;
-  box-shadow: 0 4px 15px rgba(14, 34, 56, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #1e293b;
 }
 
 .aajtak-nav-inner {
@@ -775,24 +776,25 @@ body.highlight-ads-active .sidebar-ad-card {
 /* Spotlight Card */
 .spotlight-news-card {
   background: #ffffff;
-  border-radius: var(--radius-lg);
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border: 1px solid var(--border-color);
   transition: var(--transition);
   cursor: pointer;
 }
 
 .spotlight-news-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-elevated);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07);
+  border-color: #cbd5e1;
 }
 
 .spotlight-image-holder {
-  height: 380px;
+  height: 350px;
   position: relative;
   overflow: hidden;
-  background: #0f141c;
+  background: #0f172a;
 }
 
 .spotlight-img {
@@ -853,8 +855,9 @@ body.highlight-ads-active .sidebar-ad-card {
   font-size: 26px;
   font-weight: 800;
   line-height: 1.35;
-  color: var(--dark-obsidian);
+  color: #0f172a;
   margin-bottom: 10px;
+  transition: color 0.15s ease;
 }
 
 .spotlight-news-card:hover .spotlight-headline {
@@ -889,9 +892,9 @@ body.highlight-ads-active .sidebar-ad-card {
 .regional-news-card {
   background: #ffffff;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border-radius: 6px;
   overflow: hidden;
-  box-shadow: var(--shadow-subtle);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
   transition: var(--transition);
@@ -899,8 +902,8 @@ body.highlight-ads-active .sidebar-ad-card {
 }
 
 .regional-news-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-card);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   border-color: #cbd5e1;
 }
 
@@ -1604,13 +1607,13 @@ body.highlight-ads-active .sidebar-ad-card {
 
 /* Mandi Rates Homepage Strip */
 .mandi-section-container {
-  margin: 24px auto;
   background: #ffffff;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 18px 22px;
-  box-shadow: var(--shadow-subtle);
-  border-top: 4px solid #f59e0b;
+  border-top: 3px solid #f59e0b;
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin: 20px 0 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .mandi-header-row {
