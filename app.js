@@ -1,3 +1,4 @@
+try { localStorage.removeItem('hisarkiaawaj_custom_ads'); } catch(_) {}
 /**
  * HisarKiAawaj (हिसार की आवाज़) — Public Website Application Logic
  * Covers: Homepage, Category Page, Search Page, Article Page
@@ -377,9 +378,6 @@ function setupBackToTop() {
 // 10. HOMEPAGE INIT
 // ============================================================================
 async function initHomePage() {
-  setupAdManagerModal();
-  setupFloatingAdTool();
-
   if (window.HisarKiAawaj?.isSupabaseConfigured()) {
     try {
       // Load ads first so carousel can use them
@@ -412,12 +410,10 @@ async function initHomePage() {
     } catch (err) {
       console.warn('Backend load failed:', err);
       renderEmptyHomePageState();
-      loadSavedAds();
-    }
+      }
   } else {
     renderEmptyHomePageState();
-    loadSavedAds();
-  }
+    }
 
   // Setup carousel after ads have been loaded
   setupCarousel();
@@ -898,158 +894,9 @@ async function initSearchPage() {
 }
 
 // ============================================================================
-// 13. IN-BROWSER AD MANAGER (Admin-only, hidden from public via CSS)
-// ============================================================================
-const presetAds = {
-  cancer_hospital: {
-    title: 'महात्मा गांधी इंस्टीट्यूट ऑफ मेडिकल साइंसेज हिसार',
-    subtitle: 'AIIMS दिल्ली व टाटा मेमोरियल से प्रशिक्षित कैंसर विशेषज्ञ डॉ. रमेश बिश्नोई · 99924-87111',
-    link: 'tel:9992487111', theme: 'cancer-hospital', badge: 'CANCER CARE PARTNER', cta: 'परामर्श लें ↗',
-  },
-  juneja_homeopathic: {
-    title: '1 - ड्राइवर आवश्यकता | जुनेजा होम्योपैथिक क्लिनिक',
-    subtitle: 'सेक्टर-14 ब्रांच, हिसार · 98960-11889',
-    link: 'tel:9896011889', theme: 'homeopathic', badge: 'URGENT HIRING · HISAR', cta: 'कॉल करें ↗',
-  },
-  plastic_surgery: {
-    title: 'SONI BURN & PLASTIC SURGERY HOSPITAL',
-    subtitle: 'Sudarshan Medspa · डॉ. सुनील सोनी · मॉडल टाउन, हिसार',
-    link: 'tel:9812000000', theme: 'plastic-surgery', badge: 'ADVANCED SURGERY', cta: 'अपॉइंटमेंट ↗',
-  },
-  royal_enfield: {
-    title: 'MALIK AUTOMOBILES — ROYAL ENFIELD HISAR',
-    subtitle: 'त्योहारी सीजन पर सभी बुलेट मॉडल्स पर शून्य ब्याज दर',
-    link: 'tel:01662200000', theme: 'royal-enfield', badge: 'AUTOMOTIVE SPONSOR', cta: 'टेस्ट राइड ↗',
-  },
-};
+// 13. AD MANAGEMENT: Managed exclusively in Admin Dashboard (/admin/dashboard.html)
+window.openAdManagerForSlot = function() {};
 
-function loadSavedAds() {
-  try {
-    const saved = JSON.parse(localStorage.getItem('hisarkiaawaj_custom_ads') || '{}');
-    Object.entries(saved).forEach(([slotId, adData]) => applyAdToSlot(slotId, adData));
-  } catch (_) {}
-}
-
-function setupAdManagerModal() {
-  const modal = document.getElementById('adManagerModal');
-  if (!modal) return;
-
-  const fileInput = document.getElementById('customAdFileInput');
-  const previewImg = document.getElementById('customAdPreviewImg');
-  const previewBox = document.getElementById('customAdPreviewBox');
-  const urlInput = document.getElementById('customAdUrlInput');
-  const linkInput = document.getElementById('customAdLinkInput');
-  const targetSlotSelect = document.getElementById('targetAdSlotSelect');
-  const saveBtn = document.getElementById('btnSaveCustomAd');
-
-  window.openAdManagerForSlot = function(slotId) {
-    appState.currentEditingSlot = slotId;
-    if (targetSlotSelect) targetSlotSelect.value = slotId;
-    modal.classList.add('active');
-  };
-
-  document.querySelectorAll('.btn-close-modal').forEach(btn =>
-    btn.addEventListener('click', () => modal.classList.remove('active'))
-  );
-  modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
-
-  fileInput?.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      if (previewImg) previewImg.src = evt.target.result;
-      if (previewBox) previewBox.style.display = 'block';
-      if (urlInput) urlInput.value = evt.target.result;
-    };
-    reader.readAsDataURL(file);
-
-    if (window.HisarKiAawaj?.isSupabaseConfigured()) {
-      try {
-        showNotification('Uploading to Supabase Storage...');
-        const url = await window.HisarKiAawaj.uploadMediaFile(file, 'ads');
-        if (urlInput) urlInput.value = url;
-        showNotification('✅ Image uploaded to Supabase!');
-      } catch (err) { console.error('Upload error:', err); }
-    }
-  });
-
-  document.querySelectorAll('.preset-ad-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.preset-ad-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      const data = presetAds[btn.dataset.preset];
-      if (data) {
-        if (urlInput) urlInput.value = btn.dataset.preset;
-        if (linkInput) linkInput.value = data.link;
-        if (previewBox) previewBox.style.display = 'none';
-      }
-    });
-  });
-
-  saveBtn?.addEventListener('click', async () => {
-    const slotId = targetSlotSelect?.value || appState.currentEditingSlot;
-    const imageVal = urlInput?.value.trim();
-    const targetLink = linkInput?.value.trim() || '#';
-    if (!imageVal) { alert('कृपया कोई विज्ञापन इमेज चुनें।'); return; }
-
-    const adData = {
-      type: imageVal in presetAds ? 'preset' : 'custom_image',
-      value: imageVal, link: targetLink, updatedAt: new Date().toISOString(),
-    };
-
-    if (window.HisarKiAawaj?.isSupabaseConfigured()) {
-      const placementMap = {
-        adSlotTopLeaderboard: 'top_leaderboard',
-        adSlotBetweenHeroAndGrid: 'infeed_between_hero',
-        adSlotInfeedCard: 'infeed_card',
-        adSlotBetweenNewsRows: 'infeed_between_rows',
-        adSlotSidebarCarousel: 'sidebar_carousel',
-        adSlotOurClients: 'our_clients',
-      };
-      try {
-        await window.HisarKiAawaj.saveAdvertisement({
-          name: 'Client Ad ' + slotId,
-          placement: placementMap[slotId] || 'top_leaderboard',
-          image_url: imageVal, destination_url: targetLink, is_active: true,
-        });
-      } catch (e) { console.warn('Supabase ad save failed:', e); }
-    }
-
-    const saved = JSON.parse(localStorage.getItem('hisarkiaawaj_custom_ads') || '{}');
-    saved[slotId] = adData;
-    localStorage.setItem('hisarkiaawaj_custom_ads', JSON.stringify(saved));
-
-    applyAdToSlot(slotId, adData);
-    modal.classList.remove('active');
-    showNotification('✅ विज्ञापन सफलतापूर्वक अपडेट हुआ!');
-  });
-}
-
-function applyAdToSlot(slotId, adData) {
-  const container = document.getElementById(slotId);
-  if (!container) return;
-  const linkEl = container.querySelector('.ad-banner-link') || container.querySelector('a');
-  if (!linkEl) return;
-
-  linkEl.href = adData.link || '#';
-  if (adData.type === 'preset' && presetAds[adData.value]) {
-    const p = presetAds[adData.value];
-    linkEl.innerHTML = `
-      <div class="ad-visual-card ${p.theme}">
-        <div>
-          <span class="ad-badge-tiny">${p.badge}</span>
-          <h4 class="ad-visual-title">${p.title}</h4>
-          <p class="ad-visual-subtitle">${p.subtitle}</p>
-        </div>
-        <span class="ad-cta-pill-white">${p.cta}</span>
-      </div>`;
-  } else {
-    linkEl.innerHTML = `<img src="${adData.value}" alt="Advertisement" style="width:100%;border-radius:8px;">`;
-  }
-}
-
-// ============================================================================
 // 14. SIDEBAR CAROUSEL — loaded exclusively from admin advertisements DB
 // ============================================================================
 function setupCarousel() {

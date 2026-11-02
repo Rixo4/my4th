@@ -1312,12 +1312,6 @@ body.highlight-ads-active .sidebar-ad-card {
   display: none !important;
 }
 
-body.is-admin-authenticated .btn-edit-ad-slot,
-body.is-admin-authenticated .floating-ad-tool-pill,
-body.is-admin-authenticated .btn-ad-manager-pill {
-  display: inline-flex !important;
-}
-
 /* ==========================================================================
    DESKTOP NAVBAR DROPDOWN MENUS
    ========================================================================== */

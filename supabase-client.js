@@ -7,17 +7,19 @@
 
 'use strict';
 
+const API_BASE = (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) ? '' : 'http://localhost:3000';
+
 function isCloudSupabaseConfigured() {
   const config = window.SUPABASE_CONFIG || {};
   return Boolean(config.url && config.anonKey && !config.url.includes('your-project-id'));
 }
 
 function isLocalBackend() {
-  return window.location.protocol.startsWith('http');
+  return true;
 }
 
 function isSupabaseConfigured() {
-  return isLocalBackend() || isCloudSupabaseConfigured();
+  return true;
 }
 
 function getSupabase() {
@@ -32,7 +34,7 @@ function getSupabase() {
 
 async function signInAdmin(email, password) {
   if (isLocalBackend()) {
-    const res = await fetch('/api/auth/login', {
+    const res = await fetch(API_BASE + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -55,7 +57,7 @@ async function signInAdmin(email, password) {
 
 async function signOutAdmin() {
   if (isLocalBackend()) {
-    await fetch('/api/auth/logout', {
+    await fetch(API_BASE + '/api/auth/logout', {
       method: 'POST',
       headers: { 'X-Requested-With': 'XMLHttpRequest' }
     }).catch(() => {});
@@ -65,7 +67,7 @@ async function signOutAdmin() {
 async function checkAdminSession() {
   if (isLocalBackend()) {
     try {
-      const res = await fetch('/api/auth/me');
+      const res = await fetch(API_BASE + '/api/auth/me');
       if (!res.ok) return null;
       const data = await res.json();
       if (!data.authenticated || !data.user) return null;
@@ -105,7 +107,7 @@ async function uploadMediaFile(file) {
     const reader = new FileReader();
     reader.onload = async () => {
       try {
-        const res = await fetch('/api/admin/upload', {
+        const res = await fetch(API_BASE + '/api/admin/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
           body: JSON.stringify({
@@ -134,7 +136,7 @@ async function getPublicArticles({ limit = 20, categorySlug = null, featuredOnly
   if (categorySlug) url += `&category=${encodeURIComponent(categorySlug)}`;
   if (featuredOnly) url += `&featured=true`;
 
-  const res = await fetch(url);
+  const res = await fetch(url.startsWith('http') ? url : API_BASE + url);
   if (!res.ok) return [];
   const data = await res.json();
   data.totalCount = data.length;
@@ -143,7 +145,7 @@ async function getPublicArticles({ limit = 20, categorySlug = null, featuredOnly
 
 async function searchPublicArticles(searchTerm, { limit = 20 } = {}) {
   const clean = (searchTerm || '').trim().toLowerCase();
-  const res = await fetch(`/api/articles?limit=${limit}`);
+  const res = await fetch(`${API_BASE}/api/articles?limit=${limit}`);
   if (!res.ok) return [];
   const data = await res.json();
   if (!clean) return data;
@@ -155,7 +157,7 @@ async function searchPublicArticles(searchTerm, { limit = 20 } = {}) {
 }
 
 async function getArticleBySlug(slug) {
-  const res = await fetch(`/api/articles/${encodeURIComponent(slug)}`);
+  const res = await fetch(`${API_BASE}/api/articles/${encodeURIComponent(slug)}`);
   if (!res.ok) return null;
   return await res.json();
 }
@@ -167,13 +169,13 @@ async function getAdminArticles({ page = 1, pageSize = 20, status = '', search =
   if (search) url += `&search=${encodeURIComponent(search)}`;
   if (categoryId) url += `&categoryId=${encodeURIComponent(categoryId)}`;
 
-  const res = await fetch(url);
+  const res = await fetch(url.startsWith('http') ? url : API_BASE + url);
   if (!res.ok) return { articles: [], totalCount: 0 };
   return await res.json();
 }
 
 async function getAdminArticleById(id) {
-  const res = await fetch(`/api/admin/articles/${id}`);
+  const res = await fetch(`${API_BASE}/api/admin/articles/${id}`);
   if (!res.ok) return null;
   return await res.json();
 }
@@ -183,7 +185,7 @@ async function saveArticle(articleData) {
   const url = isUpdate ? `/api/admin/articles/${articleData.id}` : '/api/admin/articles';
   const method = isUpdate ? 'PUT' : 'POST';
 
-  const res = await fetch(url, {
+  const res = await fetch(url.startsWith('http') ? url : API_BASE + url, {
     method,
     headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
     body: JSON.stringify(articleData)
@@ -195,7 +197,7 @@ async function saveArticle(articleData) {
 }
 
 async function deleteArticle(id) {
-  const res = await fetch(`/api/admin/articles/${id}`, {
+  const res = await fetch(`${API_BASE}/api/admin/articles/${id}`, {
     method: 'DELETE',
     headers: { 'X-Requested-With': 'XMLHttpRequest' }
   });
@@ -205,13 +207,13 @@ async function deleteArticle(id) {
 }
 
 async function getTrashedArticles() {
-  const res = await fetch('/api/admin/articles/trash');
+  const res = await fetch(API_BASE + '/api/admin/articles/trash');
   if (!res.ok) return [];
   return await res.json();
 }
 
 async function restoreArticle(id) {
-  const res = await fetch(`/api/admin/articles/${id}/restore`, {
+  const res = await fetch(`${API_BASE}/api/admin/articles/${id}/restore`, {
     method: 'POST',
     headers: { 'X-Requested-With': 'XMLHttpRequest' }
   });
@@ -221,7 +223,7 @@ async function restoreArticle(id) {
 }
 
 async function togglePublishArticle(id) {
-  const res = await fetch(`/api/admin/articles/${id}/toggle-publish`, {
+  const res = await fetch(`${API_BASE}/api/admin/articles/${id}/toggle-publish`, {
     method: 'PATCH',
     headers: { 'X-Requested-With': 'XMLHttpRequest' }
   });
@@ -231,7 +233,7 @@ async function togglePublishArticle(id) {
 }
 
 async function purgeArticle(id) {
-  const res = await fetch(`/api/admin/articles/${id}/purge`, {
+  const res = await fetch(`${API_BASE}/api/admin/articles/${id}/purge`, {
     method: 'DELETE',
     headers: { 'X-Requested-With': 'XMLHttpRequest' }
   });
@@ -245,13 +247,13 @@ async function purgeArticle(id) {
 // ============================================================================
 
 async function getCategories() {
-  const res = await fetch('/api/categories');
+  const res = await fetch(API_BASE + '/api/categories');
   if (!res.ok) return [];
   return await res.json();
 }
 
 async function saveCategory(categoryData) {
-  const res = await fetch('/api/admin/categories', {
+  const res = await fetch(API_BASE + '/api/admin/categories', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
     body: JSON.stringify(categoryData)
@@ -262,7 +264,7 @@ async function saveCategory(categoryData) {
 }
 
 async function deleteCategory(id) {
-  const res = await fetch(`/api/admin/categories/${id}`, {
+  const res = await fetch(`${API_BASE}/api/admin/categories/${id}`, {
     method: 'DELETE',
     headers: { 'X-Requested-With': 'XMLHttpRequest' }
   });
@@ -276,19 +278,19 @@ async function deleteCategory(id) {
 // ============================================================================
 
 async function getActiveAdvertisements() {
-  const res = await fetch('/api/ads');
+  const res = await fetch(API_BASE + '/api/ads');
   if (!res.ok) return [];
   return await res.json();
 }
 
 async function getAdminAdvertisements() {
-  const res = await fetch('/api/ads');
+  const res = await fetch(API_BASE + '/api/ads');
   if (!res.ok) return [];
   return await res.json();
 }
 
 async function saveAdvertisement(adData) {
-  const res = await fetch('/api/admin/ads', {
+  const res = await fetch(API_BASE + '/api/admin/ads', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
     body: JSON.stringify(adData)
@@ -299,7 +301,7 @@ async function saveAdvertisement(adData) {
 }
 
 async function deleteAdvertisement(id) {
-  const res = await fetch(`/api/admin/ads/${id}`, {
+  const res = await fetch(`${API_BASE}/api/admin/ads/${id}`, {
     method: 'DELETE',
     headers: { 'X-Requested-With': 'XMLHttpRequest' }
   });
