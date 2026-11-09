@@ -62,9 +62,13 @@ async function initAdminSession() {
 function setupStatusIndicator() {
   const pill = document.getElementById('supabaseStatusPill');
   const text = document.getElementById('supabaseStatusText');
+  const isCloud = window.HisarKiAawaj?.isCloudSupabaseConfigured?.();
   const isConfigured = window.HisarKiAawaj?.isSupabaseConfigured();
 
-  if (isConfigured) {
+  if (isCloud) {
+    pill.className = 'connection-status-pill connected';
+    text.textContent = 'System Online · Supabase Connected';
+  } else if (isConfigured) {
     pill.className = 'connection-status-pill connected';
     text.textContent = 'System Online · SQLite Active';
   } else {
