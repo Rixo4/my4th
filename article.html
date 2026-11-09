@@ -338,16 +338,28 @@
   <!-- ======================================================================
        ARTICLE CONTENT MAIN
        ====================================================================== -->
+  <!-- Top Reading Progress Bar -->
+  <div class="reading-progress-container">
+    <div class="reading-progress-bar" id="readingProgressBar"></div>
+  </div>
+
   <main class="article-page-container">
-    <div id="articleLoadingState" style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
-      <div style="font-size: 28px; margin-bottom: 10px;">📰</div>
-      <h3>समाचार लोड हो रहा है... (Loading Article)</h3>
+    <div id="articleLoadingState" style="padding: 20px 0;">
+      <div class="skeleton-card" style="padding: 24px; border: none; box-shadow: none;">
+        <div class="skeleton-shimmer skeleton-line tag" style="margin-bottom: 16px;"></div>
+        <div class="skeleton-shimmer skeleton-line title" style="height: 28px; margin-bottom: 8px;"></div>
+        <div class="skeleton-shimmer skeleton-line title-short" style="height: 28px; margin-bottom: 20px;"></div>
+        <div class="skeleton-shimmer skeleton-img" style="border-radius: 8px; margin-bottom: 24px;"></div>
+        <div class="skeleton-shimmer skeleton-line" style="margin-bottom: 12px;"></div>
+        <div class="skeleton-shimmer skeleton-line" style="margin-bottom: 12px;"></div>
+        <div class="skeleton-shimmer skeleton-line" style="width: 75%;"></div>
+      </div>
     </div>
 
     <article id="articleContentZone" style="display: none;">
       <div class="article-header-zone">
         <a class="article-category-badge" id="articleCategoryText" href="category.html" style="text-decoration:none;">हिसार विशेष</a>
-        <h1 class="article-full-headline" id="articleHeadlineText"></h1>
+        <h1 class="article-full-headline" id="articleHeadlineText" style="line-height: 1.48; padding-bottom: 3px; word-break: break-word;"></h1>
         
         <div class="article-meta-row">
           <div class="article-author-info">
@@ -357,18 +369,38 @@
             <span id="articleDateText"></span>
           </div>
 
-          <div class="share-buttons-group">
-            <a href="#" id="btnShareWa" target="_blank" class="btn-share-icon whatsapp">
-              <span>WhatsApp</span>
-            </a>
-            <button class="btn-share-icon" onclick="copyArticleLink()">
-              <span>🔗 Copy Link</span>
-            </button>
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div class="font-size-adjuster-group" title="अक्षर का आकार (Text Size)">
+              <button class="btn-font-adjust" onclick="adjustFontSize(-1)">A-</button>
+              <button class="btn-font-adjust active" id="btnFontNormal" onclick="adjustFontSize(0)">A</button>
+              <button class="btn-font-adjust" onclick="adjustFontSize(1)">A+</button>
+            </div>
+
+            <div class="share-buttons-group">
+              <a href="#" id="btnShareWa" target="_blank" class="btn-share-icon whatsapp">
+                <span>💬 WhatsApp</span>
+              </a>
+              <button class="btn-share-icon" onclick="copyArticleLink()">
+                <span>🔗 Copy Link</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <img id="articleFeaturedImg" src="" alt="Featured Article Image" class="article-featured-hero-img">
+      <div class="article-featured-image-wrapper" style="width: 100%; aspect-ratio: 16 / 9; max-height: 520px; overflow: hidden; border-radius: var(--radius-md); background: #0f172a; margin: 20px 0 8px;">
+        <img id="articleFeaturedImg"
+             src=""
+             alt="Featured Article Image"
+             style="width: 100%; height: 100%; object-fit: cover; object-position: center 25%; display: block;"
+             loading="eager"
+             decoding="async"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=1200';">
+      </div>
+      <div class="article-photo-caption">
+        <span>📸 सांकेतिक तस्वीर / हिसार की आवाज़ ब्यूरो</span>
+        <span style="font-size: 11px; color: var(--text-light);">HD Media</span>
+      </div>
 
       <!-- In-Article Native Sponsor Unit -->
       <div class="in-article-sponsor-box" id="inArticleAdBox" style="display:none;">
@@ -392,6 +424,14 @@
       </section>
     </article>
   </main>
+
+  <!-- Floating Mobile WhatsApp Share Bar -->
+  <div class="floating-mobile-share-bar" id="mobileStickyShareBar">
+    <span class="floating-share-label">📲 खबर शेयर करें:</span>
+    <a href="#" id="btnMobileWaShare" target="_blank" class="floating-share-wa-btn">
+      <span>💬 WhatsApp पर भेजें</span>
+    </a>
+  </div>
 
   <!-- ======================================================================
        FOOTER
@@ -456,7 +496,10 @@
       // WhatsApp Share Link
       const shareUrl = encodeURIComponent(window.location.href);
       const shareText = encodeURIComponent(`${article.title}\n\nपढ़ें HisarKiAawaj पर: `);
-      document.getElementById('btnShareWa').href = `https://api.whatsapp.com/send?text=${shareText}${shareUrl}`;
+      const waLink = `https://api.whatsapp.com/send?text=${shareText}${shareUrl}`;
+      document.getElementById('btnShareWa').href = waLink;
+      const mobileWaBtn = document.getElementById('btnMobileWaShare');
+      if (mobileWaBtn) mobileWaBtn.href = waLink;
 
       // Show content
       document.getElementById('articleLoadingState').style.display = 'none';
@@ -525,6 +568,30 @@
     function copyArticleLink() {
       navigator.clipboard.writeText(window.location.href).then(() => {
         alert('लिंक कॉपी किया गया! (Article link copied to clipboard)');
+      });
+    }
+
+    // Top Reading Progress Tracker
+    window.addEventListener('scroll', () => {
+      const bar = document.getElementById('readingProgressBar');
+      if (!bar) return;
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+      bar.style.width = scrolled + '%';
+    });
+
+    // Font Size Adjuster Logic
+    let currentFontStep = 0; // -1: small (15px), 0: normal (17px), 1: large (19px)
+    function adjustFontSize(step) {
+      const bodyEl = document.getElementById('articleBodyHtml');
+      if (!bodyEl) return;
+      currentFontStep = step;
+      const sizes = { '-1': '15px', '0': '17px', '1': '20px' };
+      bodyEl.style.fontSize = sizes[String(step)] || '17px';
+
+      document.querySelectorAll('.btn-font-adjust').forEach((btn, idx) => {
+        btn.classList.toggle('active', (step === -1 && idx === 0) || (step === 0 && idx === 1) || (step === 1 && idx === 2));
       });
     }
 

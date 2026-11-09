@@ -257,7 +257,7 @@ async function loadManageNews() {
           </button>
           <a href="../article.html?slug=${art.slug}" target="_blank" class="btn-table-action" title="View Public Post">👁️</a>
           <button class="btn-table-action" title="Edit Article" onclick="editArticle('${art.id}')">✏️</button>
-          <button class="btn-table-action delete" title="Move to Trash" onclick="promptDelete('article', '${art.id}', '${escapeQuotes(art.title)}')">🗑️</button>
+          <button class="btn-table-action delete" title="Move to Trash" onclick="promptDelete('article', '${art.id}')">🗑️</button>
         </div>
       </td>
     </tr>
@@ -615,7 +615,7 @@ async function loadCategoriesTable() {
       <td style="text-align: right;">
         <div class="action-buttons-group" style="justify-content: flex-end;">
           <button class="btn-table-action" title="Edit Category" onclick="editCategory('${c.id}')">✏️</button>
-          <button class="btn-table-action delete" title="Delete Category" onclick="promptDelete('category', '${c.id}', '${c.name}')">🗑️</button>
+          <button class="btn-table-action delete" title="Delete Category" onclick="promptDelete('category', '${c.id}')">🗑️</button>
         </div>
       </td>
     </tr>
@@ -739,7 +739,7 @@ async function loadAdvertisementsTable() {
             ${ad.is_active ? '⏸️' : '▶️'}
           </button>
           <button class="btn-table-action" title="Edit Advertisement" onclick="editAd('${ad.id}')">✏️</button>
-          <button class="btn-table-action delete" title="Delete Advertisement" onclick="promptDelete('ad', '${ad.id}', '${escapeQuotes(ad.name)}')">🗑️</button>
+          <button class="btn-table-action delete" title="Delete Advertisement" onclick="promptDelete('ad', '${ad.id}')">🗑️</button>
         </div>
       </td>
     </tr>
@@ -904,7 +904,20 @@ function setupDeleteModal() {
   const msgEl = document.getElementById('deleteModalMessage');
   const confirmBtn = document.getElementById('btnConfirmDelete');
 
-  window.promptDelete = function(type, id, name) {
+  window.promptDelete = function(type, id, explicitName) {
+    let name = explicitName;
+    if (!name) {
+      if (type === 'article') {
+        const art = (adminState.articles || []).find(a => String(a.id) === String(id));
+        name = art ? art.title : 'this article';
+      } else if (type === 'category') {
+        const cat = (adminState.categories || []).find(c => String(c.id) === String(id));
+        name = cat ? cat.name : 'this category';
+      } else if (type === 'ad') {
+        const ad = (adminState.advertisements || []).find(a => String(a.id) === String(id));
+        name = ad ? ad.name : 'this advertisement';
+      }
+    }
     adminState.deleteTarget = { type, id, name };
     if (type === 'article') {
       msgEl.textContent = `Move "${name}" to Trash? It will be removed from all public pages immediately and can be recovered later from the Trash Bin.`;
@@ -916,7 +929,12 @@ function setupDeleteModal() {
     modal.classList.add('active');
   };
 
-  window.promptPurgeArticle = function(id, name) {
+  window.promptPurgeArticle = function(id, explicitName) {
+    let name = explicitName;
+    if (!name) {
+      const art = (adminState.trashedArticles || []).find(a => String(a.id) === String(id)) || (adminState.articles || []).find(a => String(a.id) === String(id));
+      name = art ? art.title : 'this article';
+    }
     adminState.deleteTarget = { type: 'purge-article', id, name };
     msgEl.textContent = `PERMANENTLY DELETE "${name}"? This will physically erase the story from the database. This action CANNOT be undone.`;
     confirmBtn.textContent = 'Permanently Delete';
@@ -1005,7 +1023,7 @@ window.loadTrashView = async function() {
         <td style="text-align: right;">
           <div class="action-buttons-group" style="justify-content: flex-end;">
             <button class="btn-table-action" style="color: #059669; font-weight: 700;" title="Restore Article" onclick="restoreTrashedArticle('${art.id}')">🔄 Restore</button>
-            <button class="btn-table-action delete" style="color: #dc2626;" title="Permanently Delete" onclick="promptPurgeArticle('${art.id}', '${escapeQuotes(art.title)}')">❌ Permanent Delete</button>
+            <button class="btn-table-action delete" style="color: #dc2626;" title="Permanently Delete" onclick="promptPurgeArticle('${art.id}')">❌ Permanent Delete</button>
           </div>
         </td>
       </tr>
@@ -1090,7 +1108,10 @@ function formatDate(dateStr) {
 }
 
 function escapeQuotes(str) {
-  return (str || '').replace(/'/g, "\\'");
+  return (str || '')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '&quot;');
 }
 
 function debounce(func, wait) {

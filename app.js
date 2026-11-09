@@ -436,7 +436,12 @@ function renderSpotlightFromData(articles) {
   container.innerHTML = `
     <article class="spotlight-news-card" onclick="window.location.href='article.html?slug=${spotlight.slug}'" style="cursor: pointer;">
       <div class="spotlight-image-holder">
-        <img src="${imgUrl}" alt="${spotlight.title}" class="spotlight-img">
+        <img src="${imgUrl}"
+             alt="${spotlight.title}"
+             class="spotlight-img"
+             loading="eager"
+             decoding="async"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200';">
         <div class="spotlight-overlay"></div>
         <span class="spotlight-kicker-tag">${categoryName}</span>
       </div>
@@ -486,7 +491,10 @@ function renderNewsGridFromData(articles) {
     <article class="regional-news-card" onclick="window.location.href='article.html?slug=${art.slug}'" style="cursor:pointer;">
       <div class="regional-img-box">
         <img src="${art.featured_image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600'}"
-             alt="${art.title}" loading="lazy">
+             alt="${art.title}"
+             loading="lazy"
+             decoding="async"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600';">
         <span class="card-live-pill">${art.category_name || art.categories?.name || 'हिसार विशेष'}</span>
       </div>
       <div class="regional-card-content">
@@ -753,7 +761,11 @@ async function loadCategoryArticles(slug, append = false) {
       <article class="spotlight-news-card" onclick="window.location.href='article.html?slug=${hero.slug}'" style="cursor:pointer;">
         <div class="spotlight-image-holder">
           <img src="${hero.featured_image || 'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=1200'}"
-               alt="${hero.title}" class="spotlight-img">
+               alt="${hero.title}"
+               class="spotlight-img"
+               loading="eager"
+               decoding="async"
+               onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=1200';">
           <div class="spotlight-overlay"></div>
           <span class="spotlight-kicker-tag">${hero.categories?.name || 'हिसार विशेष'}</span>
         </div>
@@ -774,7 +786,10 @@ async function loadCategoryArticles(slug, append = false) {
     <article class="regional-news-card" onclick="window.location.href='article.html?slug=${art.slug}'" style="cursor:pointer;">
       <div class="regional-img-box">
         <img src="${art.featured_image || 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600'}"
-             alt="${art.title}" loading="lazy">
+             alt="${art.title}"
+             loading="lazy"
+             decoding="async"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544717305-2782549b5136?w=600';">
         <span class="card-live-pill">${art.category_name || art.categories?.name || 'हिसार विशेष'}</span>
       </div>
       <div class="regional-card-content">
@@ -879,7 +894,10 @@ async function initSearchPage() {
     <div class="search-result-card" onclick="window.location.href='article.html?slug=${art.slug}'" style="cursor:pointer;">
       <img class="search-result-img"
            src="${art.featured_image || 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400'}"
-           alt="${art.title}" loading="lazy">
+           alt="${art.title}"
+           loading="lazy"
+           decoding="async"
+           onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544717305-2782549b5136?w=400';">
       <div>
         <div style="margin-bottom:4px;">
           <span class="regional-category-tag">${art.category_name || art.categories?.name || 'हिसार विशेष'}</span>

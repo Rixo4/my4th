@@ -791,7 +791,9 @@ body.highlight-ads-active .sidebar-ad-card {
 }
 
 .spotlight-image-holder {
-  height: 350px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 480px;
   position: relative;
   overflow: hidden;
   background: #0f172a;
@@ -801,6 +803,8 @@ body.highlight-ads-active .sidebar-ad-card {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 25%;
+  display: block;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -852,11 +856,13 @@ body.highlight-ads-active .sidebar-ad-card {
 
 .spotlight-headline {
   font-family: var(--font-serif);
-  font-size: 26px;
+  font-size: clamp(20px, 2.4vw, 28px);
   font-weight: 800;
-  line-height: 1.35;
+  line-height: 1.52;
   color: #0f172a;
   margin-bottom: 10px;
+  padding-bottom: 2px;
+  word-break: break-word;
   transition: color 0.15s ease;
 }
 
@@ -892,32 +898,36 @@ body.highlight-ads-active .sidebar-ad-card {
 .regional-news-card {
   background: #ffffff;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
+  height: 100%;
   transition: var(--transition);
   cursor: pointer;
 }
 
 .regional-news-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
   border-color: #cbd5e1;
 }
 
 .regional-img-box {
-  height: 190px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
   position: relative;
   overflow: hidden;
-  background: #182230;
+  background: #0f172a;
 }
 
 .regional-img-box img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 25%;
+  display: block;
   transition: transform 0.4s;
 }
 
@@ -941,11 +951,11 @@ body.highlight-ads-active .sidebar-ad-card {
   padding: 16px;
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 1 auto;
 }
 
 .regional-category-tag {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.6px;
   color: var(--brand-red);
@@ -957,9 +967,11 @@ body.highlight-ads-active .sidebar-ad-card {
   font-family: var(--font-serif);
   font-size: 17px;
   font-weight: 800;
-  line-height: 1.4;
+  line-height: 1.58;
   color: var(--dark-obsidian);
   margin-bottom: 10px;
+  padding-bottom: 2px;
+  word-break: break-word;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -1691,3 +1703,190 @@ body.highlight-ads-active .sidebar-ad-card {
   }
 }
 
+
+/* ==========================================================================
+   INDUSTRIAL LEVEL UI ENHANCEMENTS: Skeleton Loaders, Reading Bar, Typography
+   ========================================================================== */
+
+/* Shimmer / Skeleton Loaders */
+.skeleton-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmerAnim 1.5s infinite linear;
+}
+
+@keyframes shimmerAnim {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.skeleton-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: 4px;
+}
+
+.skeleton-line.tag { width: 35%; height: 10px; }
+.skeleton-line.title { width: 90%; height: 16px; }
+.skeleton-line.title-short { width: 60%; height: 16px; }
+.skeleton-line.meta { width: 45%; height: 10px; margin-top: 10px; }
+
+/* Reading Progress Bar (Top of Screen) */
+.reading-progress-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3.5px;
+  background: transparent;
+  z-index: 9999;
+}
+
+.reading-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #b91c1c, #dc2626);
+  transition: width 0.1s ease;
+}
+
+/* Floating Mobile WhatsApp 1-Tap Share Bar */
+.floating-mobile-share-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(8px);
+  padding: 10px 16px;
+  z-index: 1000;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .floating-mobile-share-bar {
+    display: flex;
+  }
+}
+
+.floating-share-wa-btn {
+  background: #25d366;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 13px;
+  border-radius: 24px;
+  padding: 8px 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  flex: 1;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.35);
+}
+
+.floating-share-label {
+  font-size: 12px;
+  color: #e2e8f0;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Key Highlights Bullet Box */
+.article-key-highlights {
+  background: #fff8f8;
+  border: 1px solid #fecaca;
+  border-left: 4px solid var(--brand-red);
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin: 20px 0;
+}
+
+.article-key-highlights h4 {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--brand-red);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.article-key-highlights ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-dark);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.article-key-highlights li {
+  margin-bottom: 6px;
+}
+
+/* Font Size Adjuster */
+.font-size-adjuster-group {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.btn-font-adjust {
+  background: transparent;
+  border: none;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: var(--transition);
+  border-right: 1px solid var(--border-light);
+}
+
+.btn-font-adjust:last-child {
+  border-right: none;
+}
+
+.btn-font-adjust:hover,
+.btn-font-adjust.active {
+  background: #f1f5f9;
+  color: var(--brand-red);
+}
+
+/* Photo Caption Box */
+.article-photo-caption {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border-light);
+}
