@@ -71,8 +71,13 @@ async function signInAdmin(email, password) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Invalid credentials');
+    let data;
+    try {
+      data = await res.json();
+    } catch (parseErr) {
+      throw new Error(`Local backend returned non-JSON response (${res.status}). Please check your server or Supabase configuration.`);
+    }
+    if (!res.ok) throw new Error(data?.error || 'Invalid credentials');
     return {
       user: data.user,
       profile: {
