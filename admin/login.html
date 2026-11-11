@@ -269,8 +269,11 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="adminPassword">Password</label>
-          <input type="password" id="adminPassword" class="form-input" placeholder="••••••••••••" required autocomplete="current-password">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="form-label" for="adminPassword" style="margin-bottom: 0;">Password</label>
+            <button type="button" id="togglePasswordBtn" style="background: none; border: none; font-size: 11px; color: var(--brand-red); cursor: pointer; font-weight: 700;">Show Password 👁️</button>
+          </div>
+          <input type="password" id="adminPassword" class="form-input" placeholder="••••••••••••" required autocomplete="off">
         </div>
 
         <button type="submit" class="btn-login-submit" id="btnSubmitLogin">
@@ -327,6 +330,19 @@
       const saveConfigBtn = document.getElementById('btnSaveConfig');
       const configUrlInput = document.getElementById('configUrlInput');
       const configKeyInput = document.getElementById('configKeyInput');
+
+      const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+      if (togglePasswordBtn && passwordInput) {
+        togglePasswordBtn.addEventListener('click', () => {
+          if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            togglePasswordBtn.textContent = 'Hide Password 🙈';
+          } else {
+            passwordInput.type = 'password';
+            togglePasswordBtn.textContent = 'Show Password 👁️';
+          }
+        });
+      }
 
       function showAlert(msg, type = 'error') {
         alertBox.textContent = msg;
