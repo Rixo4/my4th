@@ -40,8 +40,14 @@ async function signInAdmin(email, password) {
     const sb = getSupabase();
     if (!sb) throw new Error('Supabase SDK not loaded');
 
-    const { data, error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) throw new Error(error.message || 'Invalid credentials');
+    const { data, error } = await sb.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password: password
+    });
+    if (error) {
+      console.error('[Supabase Auth Error]', error.status, error.message, JSON.stringify(error));
+      throw new Error(error.message || 'Invalid credentials');
+    }
 
     const { data: profile, error: profErr } = await sb
       .from('profiles')
