@@ -251,10 +251,10 @@
       <!-- Error / Alert Banner -->
       <div class="alert-banner" id="loginAlert"></div>
 
-      <form id="adminLoginForm">
+      <form id="adminLoginForm" onsubmit="return false;">
         <div class="form-group">
           <label class="form-label" for="adminEmail">Administrator Email</label>
-          <input type="email" id="adminEmail" class="form-input" placeholder="hisarkiawaaz@gmail.com" required autocomplete="email">
+          <input type="email" id="adminEmail" class="form-input" value="hisarkiaawaaz@gmail.com" placeholder="hisarkiaawaaz@gmail.com" required autocomplete="email">
         </div>
 
         <div class="form-group">
@@ -304,7 +304,7 @@
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', () => {
       const loginForm = document.getElementById('adminLoginForm');
       const emailInput = document.getElementById('adminEmail');
       const passwordInput = document.getElementById('adminPassword');
@@ -317,27 +317,25 @@
       const configUrlInput = document.getElementById('configUrlInput');
       const configKeyInput = document.getElementById('configKeyInput');
 
-      // Populate config modal with current values
-      configUrlInput.value = window.SUPABASE_CONFIG?.url || '';
-      configKeyInput.value = window.SUPABASE_CONFIG?.anonKey || '';
-
-      // Check if already authenticated as admin -> Auto redirect
-      try {
-        const session = await window.HisarKiAawaj?.checkAdminSession();
-        if (session) {
-          window.location.href = 'dashboard.html';
-          return;
-        }
-      } catch (e) {}
-
-      // Notice if keys are placeholders
-      if (!window.HisarKiAawaj?.isSupabaseConfigured()) {
-        showAlert('Supabase keys not configured yet. Click "Edit Supabase Connection" below to set your keys, or test the dashboard directly.', 'info');
+      function showAlert(msg, type = 'error') {
+        alertBox.textContent = msg;
+        alertBox.className = `alert-banner ${type}`;
+        alertBox.style.display = 'block';
       }
 
-      // Handle Login
+      function hideAlert() {
+        alertBox.style.display = 'none';
+      }
+
+      // Populate config modal with current values
+      if (configUrlInput) configUrlInput.value = window.SUPABASE_CONFIG?.url || '';
+      if (configKeyInput) configKeyInput.value = window.SUPABASE_CONFIG?.anonKey || '';
+
+      // Handle Login immediately (before any async checks)
       loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        e.stopPropagation();
+
         const email = emailInput.value.trim();
         const password = passwordInput.value;
 
@@ -352,7 +350,6 @@
 
         try {
           if (!window.HisarKiAawaj?.isSupabaseConfigured()) {
-            // Demonstration bypass when keys are not plugged in yet
             showAlert('Demonstration mode: Entering Admin Dashboard with local administrator profile...', 'info');
             setTimeout(() => {
               window.location.href = 'dashboard.html?demo=true';
@@ -366,6 +363,7 @@
             window.location.href = 'dashboard.html';
           }, 600);
         } catch (err) {
+          console.error('Login error:', err);
           showAlert(err.message || 'Login failed. Please verify your credentials and administrator role.', 'error');
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<span>Sign In to Dashboard</span><span>→</span>';
@@ -373,10 +371,10 @@
       });
 
       // Config Modal Events
-      openConfigBtn.addEventListener('click', () => configModal.classList.add('active'));
-      closeConfigBtn.addEventListener('click', () => configModal.classList.remove('active'));
+      openConfigBtn?.addEventListener('click', () => configModal.classList.add('active'));
+      closeConfigBtn?.addEventListener('click', () => configModal.classList.remove('active'));
 
-      saveConfigBtn.addEventListener('click', () => {
+      saveConfigBtn?.addEventListener('click', () => {
         const url = configUrlInput.value.trim();
         const key = configKeyInput.value.trim();
         if (url && key) {
@@ -388,14 +386,17 @@
         }
       });
 
-      function showAlert(msg, type = 'error') {
-        alertBox.textContent = msg;
-        alertBox.className = `alert-banner ${type}`;
-      }
-
-      function hideAlert() {
-        alertBox.style.display = 'none';
-      }
+      // Check if already authenticated as admin in background -> Auto redirect
+      (async () => {
+        try {
+          const session = await window.HisarKiAawaj?.checkAdminSession();
+          if (session) {
+            window.location.href = 'dashboard.html';
+          }
+        } catch (e) {
+          console.warn('Session check skipped:', e);
+        }
+      })();
     });
   </script>
 </body>
