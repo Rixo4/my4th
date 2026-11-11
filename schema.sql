@@ -91,7 +91,33 @@ CREATE TABLE IF NOT EXISTS public.advertisements (
 CREATE INDEX IF NOT EXISTS idx_articles_slug ON public.articles(slug);
 CREATE INDEX IF NOT EXISTS idx_articles_status_pub ON public.articles(status, published_at DESC);
 CREATE INDEX IF NOT EXISTS idx_articles_category ON public.articles(category_id);
-CREATE INDEX IF NOT EXISTS idx_articles_featured ON public.articles(is_featured) WHERE is_featured = true;
+-- Convert is_featured to boolean if it exists as integer
+DO $$ 
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'articles' 
+      AND column_name = 'is_featured' 
+      AND data_type IN ('integer', 'smallint', 'bigint')
+  ) THEN
+    ALTER TABLE public.articles 
+    ALTER COLUMN is_featured TYPE BOOLEAN USING (is_featured = 1);
+  END IF;
+  
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'advertisements' 
+      AND column_name = 'is_active' 
+      AND data_type IN ('integer', 'smallint', 'bigint')
+  ) THEN
+    ALTER TABLE public.advertisements 
+    ALTER COLUMN is_active TYPE BOOLEAN USING (is_active = 1);
+  END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_articles_featured ON public.articles(is_featured);
 CREATE INDEX IF NOT EXISTS idx_categories_slug ON public.categories(slug);
 CREATE INDEX IF NOT EXISTS idx_ads_placement_active ON public.advertisements(placement, is_active);
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON public.profiles(role);
