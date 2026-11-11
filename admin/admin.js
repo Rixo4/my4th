@@ -39,7 +39,7 @@ async function initAdminSession() {
   
   if (!isConfigured) {
     // Demonstration Mode with warning pill
-    adminState.activeAdmin = { email: 'admin@hisarkiaawaj.com', role: 'admin', full_name: 'Administrator (Demo Mode)' };
+    adminState.activeAdmin = { email: 'hisarkiawaaz@gmail.com', role: 'admin', full_name: 'Administrator (Demo Mode)' };
     document.getElementById('sidebarAdminName').textContent = 'Admin (Setup Mode)';
     return;
   }

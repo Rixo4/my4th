@@ -12,8 +12,8 @@ export const config = {
   rootDir,
   sessionSecret: process.env.SESSION_SECRET || 'hisarkiaawaj_secret_session_key_2026',
   defaultAdmin: {
-    username: process.env.ADMIN_USERNAME || 'admin@hisarkiaawaj.com',
-    password: process.env.ADMIN_PASSWORD || 'Admin@12345',
+    username: process.env.ADMIN_USERNAME || 'hisarkiawaaz@gmail.com',
+    password: process.env.ADMIN_PASSWORD || 'Hisarkiawaaz@09',
     fullName: 'Editor-in-Chief'
   }
 };
