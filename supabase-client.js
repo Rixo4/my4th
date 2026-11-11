@@ -9,13 +9,19 @@
 
 const API_BASE = (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) ? '' : 'http://localhost:3000';
 
-function isCloudSupabaseConfigured() {
-  const config = window.SUPABASE_CONFIG || {};
-  return Boolean(config.url && config.anonKey && !config.url.includes('your-project-id') && !config.anonKey.includes('your-supabase-anon-key'));
+function isLocalBackend() {
+  // On localhost, always use the local Node.js backend (Supabase is for production only)
+  return typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1'
+  );
 }
 
-function isLocalBackend() {
-  return !isCloudSupabaseConfigured() && typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+function isCloudSupabaseConfigured() {
+  // Only use Supabase Cloud when NOT on localhost
+  if (isLocalBackend()) return false;
+  const config = window.SUPABASE_CONFIG || {};
+  return Boolean(config.url && config.anonKey && !config.url.includes('your-project-id') && !config.anonKey.includes('your-supabase-anon-key'));
 }
 
 function isSupabaseConfigured() {
