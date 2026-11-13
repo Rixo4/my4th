@@ -3,8 +3,8 @@
  */
 
 (function() {
-  const DEFAULT_URL = 'https://bccftedwljqihfbrcijw.supabase.co';
-  const DEFAULT_ANON_KEY = 'sb_publishable_q00sDcQicqHWX0B9ytBH6w_AXQ80_S4';
+  const DEFAULT_URL = 'https://dbmzgbdmvobipeobtgxb.supabase.co';
+  const DEFAULT_ANON_KEY = 'sb_publishable_kjG3pcRmb3NbxV3YfhuW3w_gXP4l2gL';
 
   function sanitize(val, fallback) {
     if (!val || typeof val !== 'string') return fallback;
