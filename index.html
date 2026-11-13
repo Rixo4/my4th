@@ -169,6 +169,43 @@
     </div>
   </nav>
 
+  <!-- Mobile Off-Canvas Drawer -->
+  <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
+  <div class="mobile-nav-drawer" id="mobileNavDrawer">
+    <div class="mobile-drawer-header">
+      <div class="mobile-drawer-brand">हिसार की आवाज़</div>
+      <button class="mobile-drawer-close" id="mobileDrawerCloseBtn" aria-label="Close menu">&times;</button>
+    </div>
+    <div class="mobile-drawer-search">
+      <input type="search" id="mobileSearchInput" placeholder="समाचार खोजें (Enter दबाएं)..." class="mobile-drawer-search-input">
+    </div>
+    <nav class="mobile-drawer-links">
+      <a href="index.html" class="mobile-drawer-link active"><span>🏠 होम (Home)</span> <span>›</span></a>
+      <a href="category.html?slug=hisar-special" class="mobile-drawer-link"><span>📍 हिसार विशेष</span> <span>›</span></a>
+      <a href="category.html?slug=haryana" class="mobile-drawer-link"><span>🏛️ हरियाणा राज्य</span> <span>›</span></a>
+      <a href="category.html?slug=crime" class="mobile-drawer-link"><span>🚨 क्राइम व जांच</span> <span>›</span></a>
+      <a href="category.html?slug=mandi-rates" class="mobile-drawer-link" style="color: #b45309;"><span>🌾 मंडी भाव बुलेटिन</span> <span>›</span></a>
+      <a href="category.html?slug=education" class="mobile-drawer-link"><span>📚 शिक्षा व करियर</span> <span>›</span></a>
+      <a href="category.html?slug=business" class="mobile-drawer-link"><span>💼 कारोबार व व्यापार</span> <span>›</span></a>
+      <a href="category.html?slug=sports" class="mobile-drawer-link"><span>🏏 खेलकूद</span> <span>›</span></a>
+      <a href="category.html?slug=lifestyle" class="mobile-drawer-link"><span>🎭 लाइफस्टाइल</span> <span>›</span></a>
+      <a href="search.html" class="mobile-drawer-link"><span>🔍 समाचार खोजें (Search)</span> <span>›</span></a>
+    </nav>
+    <div class="mobile-drawer-districts">
+      <div class="mobile-districts-title">स्थान / तहसील चुनें</div>
+      <div class="mobile-districts-grid">
+        <a href="category.html?slug=hisar-special" class="mobile-district-chip">हिसार शहर</a>
+        <a href="category.html?slug=hisar-special&district=hansi" class="mobile-district-chip">हांसी</a>
+        <a href="category.html?slug=hisar-special&district=barwala" class="mobile-district-chip">बरवाला</a>
+        <a href="category.html?slug=hisar-special&district=adampur" class="mobile-district-chip">आदमपुर</a>
+        <a href="category.html?slug=haryana&district=fatehabad" class="mobile-district-chip">फतेहाबाद</a>
+        <a href="category.html?slug=haryana&district=sirsa" class="mobile-district-chip">सिरसा</a>
+        <a href="category.html?slug=haryana&district=bhiwani" class="mobile-district-chip">भिवानी</a>
+        <a href="category.html?slug=haryana&district=rohtak" class="mobile-district-chip">रोहतक</a>
+      </div>
+    </div>
+  </div>
+
   <!-- ======================================================================
        HEADER LAYER 4: Red BREAKING NEWS Bar (Aaj Tak Style Capsule)
        ====================================================================== -->
@@ -318,7 +355,6 @@
         </div>
 
         <!-- "OUR CLIENTS / हमारे स्थानीय प्रायोजक" -->
-                <!-- OUR CLIENTS: populated dynamically from admin advertisements (placement: our_clients) -->
         <div class="our-clients-panel" id="adSlotOurClients" style="display:none;">
           <div class="panel-heading-row">
             <h3 class="panel-title">Our Clients / हमारे प्रायोजक</h3>
@@ -326,8 +362,9 @@
           <div class="clients-ad-grid" id="ourClientsGrid"></div>
         </div>
 
-        
-  </div>
+      </aside>
+    </div>
+  </main>
 
   <!-- ======================================================================
        INTERACTIVE PUBLIC MODALS
@@ -456,23 +493,21 @@
         <span class="public-modal-close" id="closeSearchModal">&times;</span>
       </div>
       <div class="public-modal-body">
-        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-          <input type="text" id="quickSearchInput" class="input-box" placeholder="कीवर्ड दर्ज करें जैसे: हिसार, मंडी, पुलिस, शिक्षा..." autofocus style="flex: 1;">
-          <button class="btn-post-ad-primary" id="btnQuickSearchSubmit">खोजें</button>
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <input type="text" id="quickSearchInput" class="input-box" placeholder="शीर्षक, शहर या विषय दर्ज करें (उदा: हिसार, मंडी भाव, पुलिस)..." autofocus style="flex: 1;">
+          <button class="btn-post-ad-primary" id="btnQuickSearchSubmit">खोजें ↗</button>
         </div>
-        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">लोकप्रिय विषय:</div>
-        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-          <a href="category.html?slug=hisar-special" class="topic-pill" style="font-size: 11px;">#हिसार विशेष</a>
-          <a href="category.html?slug=mandi-rates" class="topic-pill" style="font-size: 11px;">#मंडी भाव</a>
-          <a href="category.html?slug=haryana" class="topic-pill" style="font-size: 11px;">#हरियाणा</a>
-          <a href="category.html?slug=crime" class="topic-pill" style="font-size: 11px;">#क्राइम व जांच</a>
-          <a href="category.html?slug=education" class="topic-pill" style="font-size: 11px;">#शिक्षा</a>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">लोकप्रिय विषय (क्लिक करें):</div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;">
+          <button type="button" class="topic-pill" style="font-size: 11px; cursor: pointer;" onclick="executeSearchWithTerm('हिसार')">#हिसार</button>
+          <button type="button" class="topic-pill" style="font-size: 11px; cursor: pointer; color: #b45309; border-color: #f59e0b;" onclick="executeSearchWithTerm('मंडी भाव')">#मंडी भाव</button>
+          <button type="button" class="topic-pill" style="font-size: 11px; cursor: pointer;" onclick="executeSearchWithTerm('हरियाणा')">#हरियाणा</button>
+          <button type="button" class="topic-pill" style="font-size: 11px; cursor: pointer;" onclick="executeSearchWithTerm('क्राइम')">#क्राइम व जांच</button>
+          <button type="button" class="topic-pill" style="font-size: 11px; cursor: pointer;" onclick="executeSearchWithTerm('शिक्षा')">#शिक्षा व नौकरी</button>
         </div>
+        <div class="instant-search-preview" id="quickSearchResultsPreview" style="display: none;"></div>
       </div>
     </div>
-  </div>
-
-  
   </div>
 
   <!-- ======================================================================

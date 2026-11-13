@@ -376,6 +376,12 @@ img {
   padding: 10px 0;
 }
 
+@media (min-width: 992px) {
+  .aajtak-nav-links {
+    overflow: visible;
+  }
+}
+
 .aajtak-nav-links::-webkit-scrollbar {
   display: none;
 }
@@ -1340,16 +1346,25 @@ body.highlight-ads-active .sidebar-ad-card {
   position: absolute;
   top: 100%;
   left: 0;
-  min-width: 190px;
-  background: var(--aajtak-navy);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  min-width: 210px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: var(--radius-sm);
   padding: 8px 0;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
   display: none;
   flex-direction: column;
-  z-index: 500;
+  z-index: 1000;
   animation: fadeInDown 0.15s ease-out;
+}
+
+.nav-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
 }
 
 .nav-item-dropdown:hover .nav-dropdown-menu,
@@ -1578,6 +1593,67 @@ body.highlight-ads-active .sidebar-ad-card {
 .public-modal-body {
   padding: 22px;
   overflow-y: auto;
+}
+
+/* Instant Live Search Preview */
+.instant-search-preview {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.instant-search-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition);
+}
+
+.instant-search-item:hover {
+  background: #fff1f2;
+  border-color: var(--brand-red);
+  transform: translateX(4px);
+}
+
+.instant-search-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #0f172a;
+}
+
+.instant-search-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.instant-search-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+
+.instant-search-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* Edition Selector Flyout */

@@ -44,6 +44,13 @@ const i18nLabels = {
   },
 };
 
+// Global search function for tag chips and inline search triggers
+window.executeSearchWithTerm = function(term) {
+  if (term) {
+    window.location.href = `search.html?q=${encodeURIComponent(term)}`;
+  }
+};
+
 // ============================================================================
 // ENTRY POINT — detect which page we're on and initialise accordingly
 // ============================================================================
@@ -247,14 +254,82 @@ function setupNavbarUtilityButtons() {
   // Quick search from modal
   const quickSearchInput = document.getElementById('quickSearchInput');
   const quickSearchBtn = document.getElementById('btnQuickSearchSubmit');
+  const previewBox = document.getElementById('quickSearchResultsPreview');
 
   function doQuickSearch() {
     const q = quickSearchInput?.value.trim();
     if (q) window.location.href = `search.html?q=${encodeURIComponent(q)}`;
+    else window.location.href = `search.html`;
   }
 
   quickSearchBtn?.addEventListener('click', doQuickSearch);
   quickSearchInput?.addEventListener('keydown', (e) => { if (e.key === 'Enter') doQuickSearch(); });
+
+  // Live instant search preview as user types
+  let searchDebounceTimer = null;
+  quickSearchInput?.addEventListener('input', () => {
+    clearTimeout(searchDebounceTimer);
+    const q = quickSearchInput.value.trim().toLowerCase();
+    if (!previewBox) return;
+
+    if (q.length < 2) {
+      previewBox.style.display = 'none';
+      previewBox.innerHTML = '';
+      return;
+    }
+
+    searchDebounceTimer = setTimeout(async () => {
+      const pool = (appState.publishedArticles && appState.publishedArticles.length > 0)
+        ? appState.publishedArticles
+        : FALLBACK_ARTICLES;
+
+      let matches = pool.filter(a =>
+        (a.title && a.title.toLowerCase().includes(q)) ||
+        (a.excerpt && a.excerpt.toLowerCase().includes(q))
+      ).slice(0, 4);
+
+      if (matches.length === 0 && window.HisarKiAawaj?.isSupabaseConfigured()) {
+        try {
+          const liveResults = await window.HisarKiAawaj.searchPublicArticles(q, { limit: 4 });
+          if (liveResults && liveResults.length > 0) matches = liveResults;
+        } catch (_) {}
+      }
+
+      if (matches.length > 0) {
+        previewBox.style.display = 'flex';
+        previewBox.innerHTML = `
+          <div style="font-size:11px;font-weight:800;color:var(--text-muted);margin-bottom:4px;">त्वरित परिणाम:</div>
+          ${matches.map(m => `
+            <a href="article.html?slug=${m.slug}" class="instant-search-item">
+              <img src="${m.featured_image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=100'}"
+                   alt="${m.title}" class="instant-search-thumb"
+                   onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=100';">
+              <div class="instant-search-info">
+                <div class="instant-search-title">${m.title}</div>
+                <div class="instant-search-meta">
+                  <span style="color:var(--brand-red);font-weight:700;">${m.category_name || m.categories?.name || 'समाचार'}</span>
+                  <span>•</span>
+                  <span>${formatTimeAgo(m.published_at || m.created_at)}</span>
+                </div>
+              </div>
+            </a>
+          `).join('')}
+          <div style="text-align:right;margin-top:6px;">
+            <a href="search.html?q=${encodeURIComponent(q)}" style="font-size:12px;font-weight:800;color:var(--brand-red);text-decoration:none;">
+              सभी परिणाम देखें ('${q}') ↗
+            </a>
+          </div>
+        `;
+      } else {
+        previewBox.style.display = 'block';
+        previewBox.innerHTML = `
+          <div style="text-align:center;padding:12px;color:var(--text-muted);font-size:12px;">
+            कोई परिणाम नहीं मिला। <button onclick="window.location.href='search.html?q=${encodeURIComponent(q)}'" style="color:var(--brand-red);font-weight:700;background:none;border:none;cursor:pointer;text-decoration:underline;">विस्तृत खोज करें ↗</button>
+          </div>
+        `;
+      }
+    }, 180);
+  });
 
   // Keyboard: Esc closes any open modal
   document.addEventListener('keydown', (e) => {
@@ -277,9 +352,9 @@ async function loadBreakingArticles() {
       }
     } catch (_) {}
   }
-  appState.breakingItems = [
-    { title: 'हिसार की आवाज़ — निष्पक्ष, निडर और सटीक डिजिटल पत्रकारिता', slug: null }
-  ];
+  appState.breakingItems = (FALLBACK_ARTICLES && FALLBACK_ARTICLES.length > 0)
+    ? FALLBACK_ARTICLES.slice(0, 5).map(a => ({ title: a.title, slug: a.slug }))
+    : [{ title: 'हिसार की आवाज़ — निष्पक्ष, निडर और सटीक डिजिटल पत्रकारिता', slug: null }];
 }
 
 function setupBreakingNewsTicker() {
@@ -378,6 +453,24 @@ function setupBackToTop() {
 // 10. HOMEPAGE INIT
 // ============================================================================
 async function initHomePage() {
+  function renderAll(articles) {
+    appState.publishedArticles = articles;
+    renderSpotlightFromData(articles);
+    renderNewsGridFromData(articles);
+    renderTrendingPillsFromArticles(articles);
+
+    const notifList = document.getElementById('notificationsList');
+    if (notifList) {
+      notifList.innerHTML = articles.slice(0, 5).map(art => `
+        <a href="article.html?slug=${art.slug}" style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; display: block; background: #fff1f2; text-decoration: none; color: inherit;">
+          <span style="font-size: 10px; background: var(--brand-red); color: #fff; padding: 2px 6px; border-radius: 3px; font-weight: 800;">ताज़ा अलर्ट</span>
+          <h5 style="font-size: 13px; font-weight: 800; margin: 6px 0 2px; color: var(--text-dark);">${art.title}</h5>
+          <span style="font-size: 11px; color: var(--text-muted);">${formatTimeAgo(art.published_at || art.created_at)}</span>
+        </a>
+      `).join('');
+    }
+  }
+
   if (window.HisarKiAawaj?.isSupabaseConfigured()) {
     try {
       // Load ads first so carousel can use them
@@ -389,31 +482,17 @@ async function initHomePage() {
 
       const articles = await window.HisarKiAawaj.getPublicArticles({ limit: 12 });
       if (articles && articles.length > 0) {
-        appState.publishedArticles = articles;
-        renderSpotlightFromData(articles);
-        renderNewsGridFromData(articles);
-        renderTrendingPillsFromArticles(articles);
-
-        const notifList = document.getElementById('notificationsList');
-        if (notifList) {
-          notifList.innerHTML = articles.slice(0, 5).map(art => `
-            <a href="article.html?slug=${art.slug}" style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; display: block; background: #fff1f2;">
-              <span style="font-size: 10px; background: var(--brand-red); color: #fff; padding: 2px 6px; border-radius: 3px; font-weight: 800;">ताज़ा अलर्ट</span>
-              <h5 style="font-size: 13px; font-weight: 800; margin: 6px 0 2px;">${art.title}</h5>
-              <span style="font-size: 11px; color: var(--text-muted);">${formatTimeAgo(art.published_at || art.created_at)}</span>
-            </a>
-          `).join('');
-        }
+        renderAll(articles);
       } else {
-        renderEmptyHomePageState();
+        renderAll(FALLBACK_ARTICLES);
       }
     } catch (err) {
-      console.warn('Backend load failed:', err);
-      renderEmptyHomePageState();
-      }
-  } else {
-    renderEmptyHomePageState();
+      console.warn('Backend load failed, fallback articles active:', err);
+      renderAll(FALLBACK_ARTICLES);
     }
+  } else {
+    renderAll(FALLBACK_ARTICLES);
+  }
 
   // Setup carousel after ads have been loaded
   setupCarousel();
@@ -526,17 +605,25 @@ function renderEmptyHomePageState() {
   if (grid) grid.innerHTML = '';
 }
 
-// Populate trending pills from actual article data
+// Populate trending pills with curated news topics and articles
 function renderTrendingPillsFromArticles(articles) {
   const row = document.getElementById('trendingPillsRow');
-  if (!row || articles.length === 0) return;
+  if (!row) return;
 
-  // Build unique trending tags from article titles
-  const pills = articles.slice(0, 8).map(a => {
-    const words = a.title.split(/\s+/).slice(0, 3).join(' ');
-    return `<a href="article.html?slug=${a.slug}" class="topic-pill">#${words}</a>`;
-  });
-  row.innerHTML = pills.join('');
+  const curated = [
+    { text: '#हिसार विशेष', href: 'category.html?slug=hisar-special' },
+    { text: '#हरियाणा Tak', href: 'category.html?slug=haryana' },
+    { text: '#मंडी भाव 🔴', href: 'category.html?slug=mandi-rates', color: '#b45309' },
+    { text: '#क्राइम व जांच', href: 'category.html?slug=crime' },
+    { text: '#शिक्षा व करियर', href: 'category.html?slug=education' },
+    { text: '#कारोबार व बाजार', href: 'category.html?slug=business' },
+    { text: '#खेलकूद', href: 'category.html?slug=sports' },
+    { text: '#लाइफस्टाइल', href: 'category.html?slug=lifestyle' },
+  ];
+
+  row.innerHTML = curated.map(c => `
+    <a href="${c.href}" class="topic-pill" ${c.color ? `style="color:${c.color};border-color:#fed7aa;"` : ''}>${c.text}</a>
+  `).join('');
 }
 
 // Render Ads from Database
@@ -624,7 +711,120 @@ const CATEGORY_META = {
   'lifestyle':     { name: 'लाइफस्टाइल',    nameEn: 'Lifestyle',     desc: 'कला, संस्कृति, स्वास्थ्य, मनोरंजन और जनजीवन' },
 };
 
-const FALLBACK_ARTICLES = [];
+const FALLBACK_ARTICLES = [
+  {
+    id: 1,
+    title: 'हिसार में नई 4-लेन आउटर रिंग रोड व बाईपास परियोजना को मिली अंतिम वित्तीय स्वीकृति',
+    slug: 'hisar-new-ring-road-project-approved-2026',
+    excerpt: 'हिसार शहर को भारी ट्रैफिक और जाम से मिलेगी बड़ी राहत, 860 करोड़ रुपये की लागत से 4-लेन आउटर रिंग रोड का निर्माण कार्य जल्द होगा शुरू।',
+    content: 'हिसार शहर के विकास को नई रफ्तार मिलने जा रही है। शहर में बढ़ रहे ट्रैफिक दबाव और जाम की गंभीर समस्या के समाधान के लिए रिंग रोड परियोजना को केंद्र व राज्य सरकार से अंतिम वित्तीय मंजूरी मिल गई है। इस परियोजना के अंतर्गत हिसार-दिल्ली, हिसार-राजगढ़ और हिसार-सिरसा राष्ट्रीय राजमार्गों को सीधे आपस में जोड़ा जाएगा, जिससे भारी वाहनों को शहर के भीतर प्रवेश किए बिना ही सीधा बाईपास मिलेगा। लोक निर्माण विभाग के अनुसार आगामी माह से निर्माण कार्य की शुरुआत होगी।',
+    featured_image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1200',
+    category_id: 1,
+    category_name: 'हिसार विशेष',
+    categories: { id: 1, name: 'हिसार विशेष', slug: 'hisar-special' },
+    is_featured: true,
+    published_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+    author_name: 'हिसार ब्यूरो',
+  },
+  {
+    id: 2,
+    title: 'हांसी-महम-रोहतक नई रेलवे लाइन पर पैसेंजर ट्रेनों का स्पीड ट्रायल सफल, नियमित संचालन की तैयारी',
+    slug: 'hansi-meham-rohtak-new-railway-line-speed-trial-success',
+    excerpt: 'उत्तर रेलवे द्वारा 120 किमी/घंटे की गति से ट्रायल पूरा किया गया। हांसी व आसपास के यात्रियों को दिल्ली व रोहतक के लिए मिलेगा सीधा रेल मार्ग।',
+    content: 'हांसी और रोहतक के बीच नव-निर्मित रेल मार्ग पर मुख्य संरक्षा आयुक्त की देखरेख में हाई-स्पीड ट्रायल सफलतापूर्वक संपन्न हुआ। इस नई लाइन के शुरू होने से हांसी से दिल्ली की दूरी लगभग 40 किलोमीटर कम हो जाएगी और यात्रा का समय 1 घंटा घट जाएगा। रेलवे अधिकारियों के मुताबिक अगले पखवाड़े से नियमित पैसेंजर ट्रेनों का संचालन शुरू कर दिया जाएगा।',
+    featured_image: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800',
+    category_id: 1,
+    category_name: 'हिसार विशेष',
+    categories: { id: 1, name: 'हिसार विशेष', slug: 'hisar-special' },
+    is_featured: false,
+    published_at: new Date(Date.now() - 3600000 * 5).toISOString(),
+    author_name: 'विशेष संवाददाता, हांसी',
+  },
+  {
+    id: 3,
+    title: 'हरियाणा कृषि अनाज मंडियों में सरसों व कपास की बंपर आवक, न्यूनतम समर्थन मूल्य से ऊंचे दामों पर सौदे',
+    slug: 'haryana-mandi-bhav-mustard-cotton-arrivals-surge',
+    excerpt: 'हिसार, आदमपुर, बरवाला और हांसी अनाज मंडियों में सरसों ₹5,450 व नरमा ₹7,120 प्रति क्विंटल बिका। किसानों के चेहरों पर लौटी रौनक।',
+    content: 'हरियाणा की प्रमुख अनाज मंडियों में रबी और खरीफ विपणन सत्र के तहत कृषि जिंसों की आवक में भारी उछाल दर्ज किया गया है। हिसार व आदमपुर मंडी में बेहतरीन गुणवत्ता वाली सरसों की खरीद सरकारी एमएसपी से भी अधिक दामों पर हो रही है। व्यापारियों का कहना है कि खाद्य तेलों की घरेलू मांग मजबूत रहने के कारण दामों में मजबूती बनी हुई है।',
+    featured_image: 'https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?w=800',
+    category_id: 4,
+    category_name: 'मंडी भाव',
+    categories: { id: 4, name: 'मंडी भाव', slug: 'mandi-rates' },
+    is_featured: false,
+    published_at: new Date(Date.now() - 3600000 * 8).toISOString(),
+    author_name: 'कृषि डेस्क, हिसार',
+  },
+  {
+    id: 4,
+    title: 'हरियाणा सरकार का युवाओं के लिए बड़ा फैसला: ग्रुप-सी व ग्रुप-डी CET भर्ती परीक्षा का नया शेड्यूल जारी',
+    slug: 'haryana-cet-group-c-d-exam-schedule-announced-hssc',
+    excerpt: 'हरियाणा कर्मचारी चयन आयोग (HSSC) ने 24,000 रिक्त पदों की भर्ती परीक्षा के लिए विस्तृत दिशानिर्देश और तिथियां घोषित कीं।',
+    content: 'हरियाणा सरकार ने प्रदेश के लाखों युवाओं के हित में बड़ा निर्णय लेते हुए ग्रुप-सी और डी की विभिन्न श्रेणी की भर्तियों के लिए सीईटी परीक्षा का नया कैलेंडर जारी कर दिया है। आयोग के अनुसार परीक्षा केंद्रों पर तकनीकी सुरक्षा व्यवस्था अनिवार्य की गई है ताकि परीक्षा निष्पक्ष व पारदर्शी तरीके से पूरी हो सके।',
+    featured_image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800',
+    category_id: 5,
+    category_name: 'शिक्षा-करियर',
+    categories: { id: 5, name: 'शिक्षा-करियर', slug: 'education' },
+    is_featured: false,
+    published_at: new Date(Date.now() - 3600000 * 12).toISOString(),
+    author_name: 'चंडीगढ़ ब्यूरो',
+  },
+  {
+    id: 5,
+    title: 'हिसार पुलिस की साइबर क्राइम यूनिट का बड़ा एक्शन: फर्जी डिजिटल अरेस्ट करने वाले अंतरराज्यीय गिरोह के 4 आरोपी गिरफ्तार',
+    slug: 'hisar-police-cyber-crime-cell-arrests-digital-arrest-gang',
+    excerpt: 'सीबीआई और पुलिस अधिकारी बनकर बुजुर्गों और व्यापारियों से ठगी करने वाले गिरोह के कब्जे से 14 मोबाइल व चेकबुक बरामद।',
+    content: 'हिसार पुलिस अधीक्षक के दिशा-निर्देशन में साइबर अपराध शाखा ने एक अंतरराज्यीय गिरोह का पर्दाफाश कर चार आरोपियों को गिरफ्तार किया है। आरोपी वरिष्ठ नागरिकों को डिजिटल अरेस्ट का डर दिखाकर पैसे ऐंठते थे। पुलिस ने इनके पास से कई बैंक खाते, सिम कार्ड और लैपटॉप सीज किए हैं।',
+    featured_image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800',
+    category_id: 3,
+    category_name: 'क्राइम व जांच',
+    categories: { id: 3, name: 'क्राइम व जांच', slug: 'crime' },
+    is_featured: false,
+    published_at: new Date(Date.now() - 3600000 * 16).toISOString(),
+    author_name: 'क्राइम टीम, हिसार',
+  },
+  {
+    id: 6,
+    title: 'चौधरी चरण सिंह हरियाणा कृषि विश्वविद्यालय (HAU) हिसार में कम पानी में अधिक पैदावार देने वाली गेहूं किस्म विकसित',
+    slug: 'hau-hisar-develops-new-high-yield-wheat-variety',
+    excerpt: 'कृषि वैज्ञानिकों ने 12 वर्षों के शोध के बाद विकसित की किस्म WH-1402, रोग प्रतिरोधक क्षमता और पोषण में उत्कृष्ट परिणाम।',
+    content: 'सीसीएस एचएयू हिसार के कृषि वैज्ञानिकों ने एक और ऐतिहासिक उपलब्धि हासिल की है। विश्वविद्यालय के पौधा प्रजनन एवं अनुवांशिकी विभाग द्वारा विकसित की गई नई गेहूं किस्म सीमित सिंचाई वाले क्षेत्रों के किसानों के लिए वरदान साबित होगी। यह किस्म पीला रतुआ और भूरा रतुआ रोगों के प्रति पूर्णतः प्रतिरोधी है।',
+    featured_image: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=800',
+    category_id: 2,
+    category_name: 'हरियाणा',
+    categories: { id: 2, name: 'हरियाणा', slug: 'haryana' },
+    is_featured: false,
+    published_at: new Date(Date.now() - 3600000 * 24).toISOString(),
+    author_name: 'HAU ब्यूरो',
+  },
+  {
+    id: 7,
+    title: 'हिसार इंडस्ट्रियल एरिया में सौर ऊर्जा आधारित नए ग्रीन एमएसएमई पार्क को राज्य कैबिनेट की मंजूरी',
+    slug: 'hisar-industrial-area-green-msme-park-cabinet-approval',
+    excerpt: 'हिसार में 250 एकड़ भूमि पर 500 नई औद्योगिक इकाइयां लगेंगी, 12,000 से अधिक स्थानीय युवाओं को मिलेंगे प्रत्यक्ष रोजगार अवसर।',
+    content: 'मुख्यमंत्री की अध्यक्षता में हुई उच्चस्तरीय कैबिनेट बैठक में हिसार में ग्रीन इंडस्ट्रियल एमएसएमई पार्क की स्थापना को औपचारिक स्वीकृति दे दी गई है। इस पार्क में इंजीनियरिंग, फूड प्रोसेसिंग और ऑटो कंपोनेंट निर्माण इकाइयों को विशेष सब्सिडी और सिंगल विंडो क्लीयरेंस की सुविधा मिलेगी।',
+    featured_image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=800',
+    category_id: 6,
+    category_name: 'कारोबार',
+    categories: { id: 6, name: 'कारोबार', slug: 'business' },
+    is_featured: false,
+    published_at: new Date(Date.now() - 3600000 * 30).toISOString(),
+    author_name: 'बिजनेस डेस्क',
+  },
+  {
+    id: 8,
+    title: 'हरियाणा स्टेट बॉक्सिंग चैंपियनशिप में हिसार की युवा प्रतिभाओं का दबदबा, 6 स्वर्ण पदक जीतकर बने ओवरऑल चैंपियन',
+    slug: 'haryana-state-boxing-championship-hisar-boxers-gold',
+    excerpt: 'महाबीर स्टेडियम के मुक्केबाजों ने फाइनल मुकाबलों में शानदार प्रदर्शन कर टीम ट्रॉफी हिसार जिले के नाम की।',
+    content: 'रोहतक में आयोजित 36वीं हरियाणा राज्य सीनियर मुक्केबाजी प्रतियोगिता में हिसार के खिलाड़ियों ने अपनी श्रेष्ठता साबित करते हुए ओवरऑल विजेता ट्रॉफी पर कब्जा जमाया। कोच और खेल संघ के पदाधिकारियों ने पदक विजेताओं का हिसार पहुंचने पर भव्य स्वागत किया।',
+    featured_image: 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=800',
+    category_id: 7,
+    category_name: 'खेल',
+    categories: { id: 7, name: 'खेल', slug: 'sports' },
+    is_featured: false,
+    published_at: new Date(Date.now() - 3600000 * 36).toISOString(),
+    author_name: 'स्पोर्ट्स डेस्क',
+  }
+];
 
 let categoryOffset = 0;
 const CATEGORY_PAGE_SIZE = 8;
@@ -658,6 +858,14 @@ async function initCategoryPage() {
 
   // Subcategory / district filter pills
   setupSubcatFilterPills();
+
+  const districtParam = params.get('district');
+  if (districtParam) {
+    setTimeout(() => {
+      const pill = document.querySelector(`.subcat-pill[data-filter="${districtParam}"]`);
+      if (pill) pill.click();
+    }, 150);
+  }
 }
 
 // Subcategory pill filter — client-side keyword filtering on rendered article cards

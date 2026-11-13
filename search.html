@@ -237,20 +237,69 @@
       </div>
 
       <div class="aajtak-nav-right-tools">
-        <div class="edition-select-chip" id="editionSelectChip">
-          <span>EDITION</span>
-          <span style="color: #f59e0b;" id="currentEditionLabel">🇮🇳 HISAR ▾</span>
+        <div style="position: relative;">
+          <div class="edition-select-chip" id="editionSelectChip" title="संस्करण चुनें">
+            <span>EDITION</span>
+            <span style="color: #f59e0b;" id="currentEditionLabel">🇮🇳 HISAR ▾</span>
+          </div>
+          <div class="edition-dropdown-menu" id="editionDropdownMenu">
+            <div class="edition-dropdown-item selected" data-edition="hisar">हिसार (Hisar) ✓</div>
+            <div class="edition-dropdown-item" data-edition="hansi">हांसी (Hansi)</div>
+            <div class="edition-dropdown-item" data-edition="fatehabad">फतेहाबाद (Fatehabad)</div>
+            <div class="edition-dropdown-item" data-edition="sirsa">सिरसा (Sirsa)</div>
+            <div class="edition-dropdown-item" data-edition="bhiwani">भिवानी (Bhiwani)</div>
+            <div class="edition-dropdown-item" data-edition="rohtak">रोहतक (Rohtak)</div>
+            <div class="edition-dropdown-item" data-edition="chandigarh">चंडीगढ़ (State Capital)</div>
+          </div>
         </div>
-        <button class="tool-icon-btn" id="ePaperBtn" title="E-Paper"><span>📰</span></button>
-        <button class="tool-icon-btn" id="aqiBtn" title="AQI"><span>🍃 AQI 142</span></button>
-        <button class="tool-icon-btn" id="notificationsBtn" title="Alerts">
+        <button class="tool-icon-btn" id="ePaperBtn" title="HisarKiAawaj ई-पेपर संस्करण"><span>📰</span></button>
+        <button class="tool-icon-btn" id="aqiBtn" title="हिसार AQI व मौसम"><span>🍃 AQI 142</span></button>
+        <button class="tool-icon-btn" id="notificationsBtn" title="ताज़ा अलर्ट">
           <span>🔔</span>
           <span class="alert-counter-badge">3</span>
         </button>
-        <button class="btn-live-tv-aajtak" id="liveTvBtn"><span>LIVE</span><span>📺</span></button>
+        <button class="btn-live-tv-aajtak" id="liveTvBtn" title="लाइव बुलेटिन"><span>LIVE</span><span>📺</span></button>
+        <button class="tool-icon-btn" id="headerSearchBtn" title="समाचार खोजें"><span>🔍</span></button>
       </div>
     </div>
   </nav>
+
+  <!-- Mobile Off-Canvas Drawer -->
+  <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
+  <div class="mobile-nav-drawer" id="mobileNavDrawer">
+    <div class="mobile-drawer-header">
+      <div class="mobile-drawer-brand">हिसार की आवाज़</div>
+      <button class="mobile-drawer-close" id="mobileDrawerCloseBtn" aria-label="Close menu">&times;</button>
+    </div>
+    <div class="mobile-drawer-search">
+      <input type="search" id="mobileSearchInput" placeholder="समाचार खोजें (Enter दबाएं)..." class="mobile-drawer-search-input">
+    </div>
+    <nav class="mobile-drawer-links">
+      <a href="index.html" class="mobile-drawer-link"><span>🏠 होम (Home)</span> <span>›</span></a>
+      <a href="category.html?slug=hisar-special" class="mobile-drawer-link"><span>📍 हिसार विशेष</span> <span>›</span></a>
+      <a href="category.html?slug=haryana" class="mobile-drawer-link"><span>🏛️ हरियाणा राज्य</span> <span>›</span></a>
+      <a href="category.html?slug=crime" class="mobile-drawer-link"><span>🚨 क्राइम व जांच</span> <span>›</span></a>
+      <a href="category.html?slug=mandi-rates" class="mobile-drawer-link" style="color: #b45309;"><span>🌾 मंडी भाव बुलेटिन</span> <span>›</span></a>
+      <a href="category.html?slug=education" class="mobile-drawer-link"><span>📚 शिक्षा व करियर</span> <span>›</span></a>
+      <a href="category.html?slug=business" class="mobile-drawer-link"><span>💼 कारोबार व व्यापार</span> <span>›</span></a>
+      <a href="category.html?slug=sports" class="mobile-drawer-link"><span>🏏 खेलकूद</span> <span>›</span></a>
+      <a href="category.html?slug=lifestyle" class="mobile-drawer-link"><span>🎭 लाइफस्टाइल</span> <span>›</span></a>
+      <a href="search.html" class="mobile-drawer-link active"><span>🔍 समाचार खोजें (Search)</span> <span>›</span></a>
+    </nav>
+    <div class="mobile-drawer-districts">
+      <div class="mobile-districts-title">स्थान / तहसील चुनें</div>
+      <div class="mobile-districts-grid">
+        <a href="category.html?slug=hisar-special" class="mobile-district-chip">हिसार शहर</a>
+        <a href="category.html?slug=hisar-special&district=hansi" class="mobile-district-chip">हांसी</a>
+        <a href="category.html?slug=hisar-special&district=barwala" class="mobile-district-chip">बरवाला</a>
+        <a href="category.html?slug=hisar-special&district=adampur" class="mobile-district-chip">आदमपुर</a>
+        <a href="category.html?slug=haryana&district=fatehabad" class="mobile-district-chip">फतेहाबाद</a>
+        <a href="category.html?slug=haryana&district=sirsa" class="mobile-district-chip">सिरसा</a>
+        <a href="category.html?slug=haryana&district=bhiwani" class="mobile-district-chip">भिवानी</a>
+        <a href="category.html?slug=haryana&district=rohtak" class="mobile-district-chip">रोहतक</a>
+      </div>
+    </div>
+  </div>
 
   <!-- SEARCH HERO SECTION -->
   <section class="search-hero-zone">
@@ -303,6 +352,150 @@
       </div>
     </div>
   </main>
+
+  <!-- ======================================================================
+       INTERACTIVE PUBLIC MODALS
+       ====================================================================== -->
+
+  <!-- 1. LIVE TV / BULLETIN MODAL -->
+  <div class="public-modal-backdrop" id="liveTvModal">
+    <div class="public-modal-box">
+      <div class="public-modal-header" style="background: #dc2626;">
+        <div class="public-modal-title">
+          <span>🔴</span>
+          <span>HisarKiAawaj Live Bulletin — सीधा प्रसारण</span>
+        </div>
+        <span class="public-modal-close" id="closeLiveTvModal">&times;</span>
+      </div>
+      <div class="public-modal-body">
+        <div style="background: #000; border-radius: 8px; height: 260px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; position: relative; overflow: hidden; margin-bottom: 16px;">
+          <div style="font-size: 48px; opacity: 0.8; margin-bottom: 8px;">📺</div>
+          <div style="font-weight: 800; font-size: 16px;">हिसार आज की ताज़ा हेडलाइंस बुलेटिन</div>
+          <div style="font-size: 12px; color: #ef4444; margin-top: 4px; display: flex; align-items: center; gap: 6px;">
+            <span style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; display: inline-block;"></span>
+            <span>LIVE STREAM CONNECTED · 1080p HD</span>
+          </div>
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(220, 38, 38, 0.9); padding: 6px 12px; font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden;">
+            🔴 हिसार की आवाज़ — निष्पक्ष, विश्वसनीय और डिजिटल स्टूडियो बुलेटिन
+          </div>
+        </div>
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+          हिसार की आवाज़ का डिजिटल स्टूडियो रोज़ाना सुबह 8 बजे और शाम 7 बजे प्रसारित करता है शहर का सबसे तेज़, निष्पक्ष और विश्वसनीय वीडियो बुलेटिन।
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. E-PAPER MODAL -->
+  <div class="public-modal-backdrop" id="ePaperModal">
+    <div class="public-modal-box">
+      <div class="public-modal-header">
+        <div class="public-modal-title">
+          <span>📰</span>
+          <span>HisarKiAawaj Digital E-Paper · आज का अखबार</span>
+        </div>
+        <span class="public-modal-close" id="closeEPaperModal">&times;</span>
+      </div>
+      <div class="public-modal-body">
+        <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 16px;">
+          <div style="font-size: 50px; margin-bottom: 10px;">🗞️</div>
+          <h4 style="font-size: 16px; font-weight: 800; margin-bottom: 4px;">हिसार एडिशन — डिजिटल संस्करण</h4>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">कुल पृष्ठ: 12 · हाई-डेफिनिशन डिजिटल PDF संस्करण</p>
+          <div style="display: flex; gap: 10px; justify-content: center;">
+            <button class="btn-post-ad-primary" onclick="showNotification('ई-पेपर पृष्ठ लोड हो रहा है...')">
+              ऑनलाइन पढ़ें ↗
+            </button>
+            <button class="btn-load-more" onclick="showNotification('PDF डाउनलोड शुरू हो रहा है...')">
+              डाउनलोड PDF ⬇
+            </button>
+          </div>
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted);">
+          <strong>नोट:</strong> हिसार की आवाज़ का ई-पेपर प्रतिदिन सुबह 5:30 बजे सभी पाठकों के लिए निःशुल्क उपलब्ध कराया जाता है।
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. AIR QUALITY & WEATHER MODAL -->
+  <div class="public-modal-backdrop" id="weatherAqiModal">
+    <div class="public-modal-box">
+      <div class="public-modal-header">
+        <div class="public-modal-title">
+          <span>🍃</span>
+          <span>हिसार मौसम व वायु गुणवत्ता (Air Quality Index)</span>
+        </div>
+        <span class="public-modal-close" id="closeWeatherModal">&times;</span>
+      </div>
+      <div class="public-modal-body">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px;">
+          <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; text-align: center;">
+            <div style="font-size: 32px;">☀️</div>
+            <div style="font-size: 24px; font-weight: 900; margin: 4px 0;">28°C</div>
+            <div style="font-size: 12px; color: var(--text-muted);">हिसार शहर (तापमान)</div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">आर्द्रता: 48% · हवा: 10 किमी/घंटा</div>
+          </div>
+          <div style="background: #fef8ee; border: 1px solid #fed7aa; border-radius: 8px; padding: 14px; text-align: center;">
+            <div style="font-size: 32px;">🍃</div>
+            <div style="font-size: 24px; font-weight: 900; color: #b45309; margin: 4px 0;">AQI 142</div>
+            <div style="font-size: 12px; font-weight: 800; color: #b45309;">मध्यम (Moderate)</div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">PM2.5: 58 µg/m³ · PM10: 112 µg/m³</div>
+          </div>
+        </div>
+        <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px 16px; border-radius: 4px; font-size: 12px; color: #1e3a8a;">
+          <strong>स्वास्थ्य परामर्श:</strong> श्वसन या अस्थमा के संवेदनशील व्यक्तियों को सुबह के समय खुले में भारी व्यायाम से बचने की सलाह दी जाती है।
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ALERTS / NOTIFICATIONS MODAL -->
+  <div class="public-modal-backdrop" id="notificationsModal">
+    <div class="public-modal-box">
+      <div class="public-modal-header">
+        <div class="public-modal-title">
+          <span>🔔</span>
+          <span>ताज़ा समाचार अलर्ट्स (Live News Alerts)</span>
+        </div>
+        <span class="public-modal-close" id="closeNotificationsModal">&times;</span>
+      </div>
+      <div class="public-modal-body">
+        <div id="notificationsList" style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px;">
+            कोई नया अलर्ट नहीं है (No new alerts)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. SEARCH OVERLAY MODAL -->
+  <div class="public-modal-backdrop" id="searchModal">
+    <div class="public-modal-box">
+      <div class="public-modal-header">
+        <div class="public-modal-title">
+          <span>🔍</span>
+          <span>हिसार समाचार खोजें (Search Hisar News)</span>
+        </div>
+        <span class="public-modal-close" id="closeSearchModal">&times;</span>
+      </div>
+      <div class="public-modal-body">
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <input type="text" id="quickSearchInput" class="input-box" placeholder="शीर्षक, शहर या विषय दर्ज करें (उदा: हिसार, मंडी भाव, पुलिस)..." autofocus style="flex: 1;">
+          <button class="btn-post-ad-primary" id="btnQuickSearchSubmit">खोजें ↗</button>
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">लोकप्रिय विषय (क्लिक करें):</div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;">
+          <button type="button" class="topic-pill" style="font-size: 11px; cursor: pointer;" onclick="executeSearchWithTerm('हिसार')">#हिसार</button>
+          <button type="button" class="topic-pill" style="font-size: 11px; cursor: pointer; color: #b45309; border-color: #f59e0b;" onclick="executeSearchWithTerm('मंडी भाव')">#मंडी भाव</button>
+          <button type="button" class="topic-pill" style="font-size: 11px; cursor: pointer;" onclick="executeSearchWithTerm('हरियाणा')">#हरियाणा</button>
+          <button type="button" class="topic-pill" style="font-size: 11px; cursor: pointer;" onclick="executeSearchWithTerm('क्राइम')">#क्राइम व जांच</button>
+          <button type="button" class="topic-pill" style="font-size: 11px; cursor: pointer;" onclick="executeSearchWithTerm('शिक्षा')">#शिक्षा व नौकरी</button>
+        </div>
+        <div class="instant-search-preview" id="quickSearchResultsPreview" style="display: none;"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- FOOTER -->
   <footer class="site-footer">
