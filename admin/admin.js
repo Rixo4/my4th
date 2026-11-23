@@ -753,6 +753,33 @@ function setupAdModal() {
   const urlInput = document.getElementById('adImageUrl');
   const preview = document.getElementById('adImagePreview');
   const previewBox = document.getElementById('adImagePreviewBox');
+  const placementSelect = document.getElementById('adPlacement');
+  const recSpan = document.getElementById('adSizeRecommendation');
+
+  const AD_PLACEMENT_SIZES = {
+    top_leaderboard: '970 × 90 px या 728 × 90 px (Horizontal Desktop Leaderboard)',
+    infeed_between_hero: '970 × 120 px या 728 × 90 px (In-Stream Wide Banner)',
+    infeed_card: '400 × 280 px या 16:9 / 4:3 अनुपात (News Card Format)',
+    infeed_between_rows: '970 × 120 px या 728 × 90 px (Full Width Grid Divider)',
+    sidebar_carousel: '300 × 250 px या 336 × 280 px (Medium Rectangle Display)',
+    our_clients: '240 × 120 px या 200 × 200 px (Square Brand Logo Tile)',
+    in_article: '728 × 90 px या 300 × 250 px (Article Embedded Banner)'
+  };
+
+  function updateAdPlacementTip() {
+    if (recSpan && placementSelect) {
+      recSpan.textContent = AD_PLACEMENT_SIZES[placementSelect.value] || 'Standard Banner (Max 5MB)';
+    }
+  }
+
+  placementSelect?.addEventListener('change', updateAdPlacementTip);
+
+  window.clearAdImagePreview = function() {
+    if (fileInput) fileInput.value = '';
+    if (urlInput) urlInput.value = '';
+    if (preview) preview.src = '';
+    if (previewBox) previewBox.style.display = 'none';
+  };
 
   // Handle image upload to Supabase Storage
   fileInput?.addEventListener('change', async (e) => {
@@ -797,6 +824,7 @@ function setupAdModal() {
     document.getElementById('adId').value = '';
     document.getElementById('adName').value = '';
     document.getElementById('adPlacement').value = 'top_leaderboard';
+    updateAdPlacementTip();
     document.getElementById('adImageUrl').value = '';
     document.getElementById('adDestinationUrl').value = '';
     document.getElementById('adSponsorTitle').value = '';
@@ -814,6 +842,7 @@ function setupAdModal() {
     document.getElementById('adId').value = ad.id;
     document.getElementById('adName').value = ad.name;
     document.getElementById('adPlacement').value = ad.placement;
+    updateAdPlacementTip();
     document.getElementById('adImageUrl').value = ad.image_url;
     document.getElementById('adDestinationUrl').value = ad.destination_url || '';
     document.getElementById('adSponsorTitle').value = ad.sponsor_title || '';

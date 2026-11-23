@@ -689,12 +689,36 @@ function applyLiveAdToSlot(slotId, ad) {
   const container = document.getElementById(slotId);
   if (!container) return;
 
+  const header = container.querySelector('.ad-slot-header');
+  if (header) {
+    header.innerHTML = `
+      <span class="ad-slot-label">विज्ञापन · ADVERTISEMENT</span>
+      ${ad.sponsor_title || ad.name ? `<span class="ad-sponsor-pill">${ad.sponsor_title || ad.name}</span>` : ''}
+    `;
+  }
+
   const linkEl = container.querySelector('.ad-banner-link') || container.querySelector('a');
   if (!linkEl) return;
 
-  if (ad.destination_url) linkEl.href = ad.destination_url;
+  if (ad.destination_url) {
+    linkEl.href = ad.destination_url;
+    linkEl.target = '_blank';
+    linkEl.rel = 'noopener noreferrer';
+  }
+
   if (ad.image_url) {
-    linkEl.innerHTML = `<img src="${ad.image_url}" alt="${ad.name}" style="width:100%;object-fit:cover;border-radius:8px;max-height:120px;">`;
+    const showFooter = (ad.sponsor_title && ad.sponsor_title.trim()) || (ad.cta_text && ad.cta_text.trim() && ad.cta_text !== 'क्लिक करें ↗');
+    linkEl.innerHTML = `
+      <div class="ad-live-wrapper">
+        <img src="${ad.image_url}" alt="${ad.name}" class="ad-banner-image" loading="lazy" style="max-height: 250px; width: 100%; object-fit: contain; background: #fafafa; border-radius: 8px;">
+        ${showFooter ? `
+          <div class="ad-live-footer">
+            <span style="font-weight:700; color:#334155;">${ad.sponsor_title || ad.name}</span>
+            <span class="ad-live-cta-btn">${ad.cta_text || 'अधिक जानकारी ↗'}</span>
+          </div>
+        ` : ''}
+      </div>
+    `;
   }
   // Show the container now that it has a live ad
   container.style.display = '';

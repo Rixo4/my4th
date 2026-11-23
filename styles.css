@@ -665,23 +665,65 @@ img {
   display: block;
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   position: relative;
-  border: 1px solid var(--border-color);
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
   transition: var(--transition);
+  text-decoration: none;
 }
 
 .ad-banner-link:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-elevated);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-color: #cbd5e1;
 }
 
 .ad-banner-image {
   width: 100%;
   height: auto;
-  max-height: 120px;
-  object-fit: cover;
+  max-height: 250px;
+  object-fit: contain;
   display: block;
+  margin: 0 auto;
+  background: #f8fafc;
+}
+
+.ad-sponsor-pill {
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.ad-live-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.ad-live-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: #ffffff;
+  border-top: 1px solid #f1f5f9;
+  font-size: 11px;
+}
+
+.ad-live-cta-btn {
+  background: var(--brand-red);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* Fallback stylized ad cards */
