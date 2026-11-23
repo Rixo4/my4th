@@ -1,4 +1,4 @@
-try { localStorage.removeItem('hisarkiaawaj_custom_ads'); } catch(_) {}
+try { localStorage.removeItem('hisarkiaawaj_custom_ads'); } catch (_) { }
 /**
  * HisarKiAawaj (हिसार की आवाज़) — Public Website Application Logic
  * Covers: Homepage, Category Page, Search Page, Article Page
@@ -45,7 +45,7 @@ const i18nLabels = {
 };
 
 // Global search function for tag chips and inline search triggers
-window.executeSearchWithTerm = function(term) {
+window.executeSearchWithTerm = function (term) {
   if (term) {
     window.location.href = `search.html?q=${encodeURIComponent(term)}`;
   }
@@ -295,7 +295,7 @@ function setupNavbarUtilityButtons() {
         try {
           const liveResults = await window.HisarKiAawaj.searchPublicArticles(q, { limit: 4 });
           if (liveResults && liveResults.length > 0) matches = liveResults;
-        } catch (_) {}
+        } catch (_) { }
       }
 
       if (matches.length > 0) {
@@ -353,7 +353,7 @@ async function loadBreakingArticles() {
         appState.breakingItems = articles.map(a => ({ title: a.title, slug: a.slug }));
         return;
       }
-    } catch (_) {}
+    } catch (_) { }
   }
   appState.breakingItems = (FALLBACK_ARTICLES && FALLBACK_ARTICLES.length > 0)
     ? FALLBACK_ARTICLES.slice(0, 5).map(a => ({ title: a.title, slug: a.slug }))
@@ -674,8 +674,8 @@ function renderOurClientsFromAds(ads) {
         <a href="${ad.destination_url || '#'}" class="client-ad-link" target="_blank" rel="noopener"
            style="display:block; padding: 10px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; text-decoration: none;">
           ${ad.image_url
-            ? `<img src="${ad.image_url}" alt="${ad.name}" style="width:100%;height:60px;object-fit:cover;border-radius:6px;margin-bottom:6px;">`
-            : ''}
+        ? `<img src="${ad.image_url}" alt="${ad.name}" style="width:100%;height:60px;object-fit:cover;border-radius:6px;margin-bottom:6px;">`
+        : ''}
           <div style="font-size: 12px; font-weight: 800; color: var(--text-dark);">${ad.name}</div>
           ${ad.sponsor_title ? `<div style="font-size: 11px; color: #64748b;">${ad.sponsor_title}</div>` : ''}
         </a>
@@ -729,13 +729,13 @@ function applyLiveAdToSlot(slotId, ad) {
 // ============================================================================
 const CATEGORY_META = {
   'hisar-special': { name: 'हिसार विशेष', nameEn: 'Hisar Special', desc: 'हिसार शहर और आसपास के जिलों की स्थानीय ताज़ा खबरें' },
-  'haryana':       { name: 'हरियाणा',      nameEn: 'Haryana',       desc: 'हरियाणा राज्य स्तरीय विकास, नीतियां और राजनीतिक समाचार' },
-  'crime':         { name: 'क्राइम व जांच', nameEn: 'Crime',         desc: 'अपराध, कानून व्यवस्था और पुलिस जांच की विस्तृत रिपोर्ट' },
-  'mandi-rates':   { name: 'मंडी भाव',      nameEn: 'Mandi Rates',   desc: 'हिसार व हरियाणा की कृषि अनाज मंडियों के दैनिक भाव बुलेटिन' },
-  'education':     { name: 'शिक्षा-करियर',  nameEn: 'Education',     desc: 'विश्वविद्यालय, स्कूल प्रवेश, सरकारी नौकरी और करियर अपडेट' },
-  'business':      { name: 'कारोबार',       nameEn: 'Business',      desc: 'व्यापार, उद्योग, स्थानीय बाजार और आर्थिक नीतियां' },
-  'sports':        { name: 'खेल',           nameEn: 'Sports',        desc: 'जिला व राज्य स्तरीय खेल प्रतियोगिताएं और खिलाड़ी समाचार' },
-  'lifestyle':     { name: 'लाइफस्टाइल',    nameEn: 'Lifestyle',     desc: 'कला, संस्कृति, स्वास्थ्य, मनोरंजन और जनजीवन' },
+  'haryana': { name: 'हरियाणा', nameEn: 'Haryana', desc: 'हरियाणा राज्य स्तरीय विकास, नीतियां और राजनीतिक समाचार' },
+  'crime': { name: 'क्राइम व जांच', nameEn: 'Crime', desc: 'अपराध, कानून व्यवस्था और पुलिस जांच की विस्तृत रिपोर्ट' },
+  'mandi-rates': { name: 'मंडी भाव', nameEn: 'Mandi Rates', desc: 'हिसार व हरियाणा की कृषि अनाज मंडियों के दैनिक भाव बुलेटिन' },
+  'education': { name: 'शिक्षा-करियर', nameEn: 'Education', desc: 'विश्वविद्यालय, स्कूल प्रवेश, सरकारी नौकरी और करियर अपडेट' },
+  'business': { name: 'कारोबार', nameEn: 'Business', desc: 'व्यापार, उद्योग, स्थानीय बाजार और आर्थिक नीतियां' },
+  'sports': { name: 'खेल', nameEn: 'Sports', desc: 'जिला व राज्य स्तरीय खेल प्रतियोगिताएं और खिलाड़ी समाचार' },
+  'lifestyle': { name: 'लाइफस्टाइल', nameEn: 'Lifestyle', desc: 'कला, संस्कृति, स्वास्थ्य, मनोरंजन और जनजीवन' },
 };
 
 const FALLBACK_ARTICLES = [
@@ -1148,7 +1148,7 @@ async function initSearchPage() {
 
 // ============================================================================
 // 13. AD MANAGEMENT: Managed exclusively in Admin Dashboard (/admin/dashboard.html)
-window.openAdManagerForSlot = function() {};
+window.openAdManagerForSlot = function () { };
 
 // 14. SIDEBAR CAROUSEL — loaded exclusively from admin advertisements DB
 // ============================================================================
@@ -1278,25 +1278,25 @@ function showNotification(msg) {
 
 // Expose showNotification globally for inline onclick usage
 window.showNotification = showNotification;
-window.openAdManagerForSlot = window.openAdManagerForSlot || function(){};
+window.openAdManagerForSlot = window.openAdManagerForSlot || function () { };
 
 // ============================================================================
 // 17. REAL-TIME LIVE WEATHER & AIR QUALITY (AQI) SERVICE
 // Powered by Open-Meteo Public Meteorological & Sensor APIs (Free, No Key Needed)
 // ============================================================================
 const DISTRICT_COORDS = {
-  hisar:      { name: 'हिसार',     lat: 29.1492, lon: 75.7217 },
-  hansi:      { name: 'हांसी',     lat: 29.1017, lon: 75.9619 },
-  fatehabad:  { name: 'फतेहाबाद', lat: 29.5146, lon: 75.4526 },
-  sirsa:      { name: 'सिरसा',    lat: 29.5349, lon: 75.0298 },
-  bhiwani:    { name: 'भिवानी',   lat: 28.7932, lon: 76.1390 },
-  rohtak:     { name: 'रोहतक',    lat: 28.8955, lon: 76.6066 },
-  chandigarh: { name: 'चंडीगढ़',  lat: 30.7333, lon: 76.7794 },
+  hisar: { name: 'हिसार', lat: 29.1492, lon: 75.7217 },
+  hansi: { name: 'हांसी', lat: 29.1017, lon: 75.9619 },
+  fatehabad: { name: 'फतेहाबाद', lat: 29.5146, lon: 75.4526 },
+  sirsa: { name: 'सिरसा', lat: 29.5349, lon: 75.0298 },
+  bhiwani: { name: 'भिवानी', lat: 28.7932, lon: 76.1390 },
+  rohtak: { name: 'रोहतक', lat: 28.8955, lon: 76.6066 },
+  chandigarh: { name: 'चंडीगढ़', lat: 30.7333, lon: 76.7794 },
 };
 
 function getAqiRating(aqiVal) {
   const v = Math.round(aqiVal || 140);
-  if (v <= 50)  return { label: 'अच्छा (Good)', short: 'अच्छा', color: '#16a34a', bg: '#ecfdf5', advice: 'हवा स्वच्छ और स्वस्थ है। बाहर की गतिविधियां सुरक्षित हैं।' };
+  if (v <= 50) return { label: 'अच्छा (Good)', short: 'अच्छा', color: '#16a34a', bg: '#ecfdf5', advice: 'हवा स्वच्छ और स्वस्थ है। बाहर की गतिविधियां सुरक्षित हैं।' };
   if (v <= 100) return { label: 'संतोषजनक (Satisfactory)', short: 'संतोषजनक', color: '#65a30d', bg: '#f7fee7', advice: 'हवा की गुणवत्ता सामान्य जनजीवन के अनुकूल है।' };
   if (v <= 200) return { label: 'मध्यम (Moderate)', short: 'मध्यम', color: '#b45309', bg: '#fef8ee', advice: 'दमा व श्वसन के संवेदनशील व्यक्तियों को सुबह के समय खुले में भारी श्रम से बचना चाहिए।' };
   if (v <= 300) return { label: 'खराब (Poor)', short: 'खराब', color: '#ea580c', bg: '#fff7ed', advice: 'मास्क का उपयोग करें, बच्चों और बुजुर्गों को सावधानी बरतनी चाहिए।' };
@@ -1306,7 +1306,7 @@ function getAqiRating(aqiVal) {
 
 function getWeatherWmoInfo(code) {
   if (code === 0) return { icon: '☀️', desc: 'साफ धूप' };
-  if (code <= 3)  return { icon: '⛅', desc: 'आंशिक बादल' };
+  if (code <= 3) return { icon: '⛅', desc: 'आंशिक बादल' };
   if (code <= 48) return { icon: '🌫️', desc: 'धुंध / कोहरा' };
   if (code <= 65) return { icon: '🌧️', desc: 'बारिश' };
   if (code <= 75) return { icon: '❄️', desc: 'बर्फबारी' };
